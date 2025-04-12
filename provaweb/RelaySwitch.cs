@@ -12,7 +12,7 @@ namespace provaweb
         private readonly MemoriaStato m_memoriaStati;
         private readonly ProgrammaSettimanale m_programmaSettimanale;
         private readonly IRelaySwitchService m_relaySwitchService;
-        public RelaySwitch(ILogger<RelaySwitch> logger, MemoriaStato memoriaStato, ProgrammaSettimanale programmaSettimanale, ProgrmmaModificaStatoRelay relaySwitchService)
+        public RelaySwitch(ILogger<RelaySwitch> logger, MemoriaStato memoriaStato, ProgrammaSettimanale programmaSettimanale, IRelaySwitchService relaySwitchService)
         {
             m_logger = logger;
             m_memoriaStati = memoriaStato;

@@ -11,7 +11,6 @@ namespace provaweb
         public static IServiceCollection AddRelaySwitch(this IServiceCollection services)
         {
             services.AddSingleton<IRelaySwitchService>(s=>s.GetRequiredService<ProgrmmaModificaStatoRelay>());
-            services.AddSingleton<ProgrmmaModificaStatoRelay>();
             services.AddHostedService(s => s.GetRequiredService<ProgrmmaModificaStatoRelay>());
             services.AddSingleton<MemoriaStato>();
             services.AddHttpClient("ESPClient");
