@@ -10,8 +10,8 @@ namespace provaweb
     {
         public static IServiceCollection AddRelaySwitch(this IServiceCollection services)
         {
-            services.AddSingleton<IRelaySwitchService>(s=>s.GetRequiredService<ProgrmmaModificaStatoRelay>());
-            services.AddHostedService(s => s.GetRequiredService<ProgrmmaModificaStatoRelay>());
+            services.AddSingleton<IRelaySwitchService, ProgrmmaModificaStatoRelay>();
+            services.AddHostedService<ProgrmmaModificaStatoRelay>();
             services.AddSingleton<MemoriaStato>();
             services.AddHttpClient("ESPClient");
             services.AddSingleton<ProgrammaSettimanale>();
