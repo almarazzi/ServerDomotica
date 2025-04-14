@@ -10,8 +10,9 @@ namespace provaweb
     {
         public static IServiceCollection AddRelaySwitch(this IServiceCollection services)
         {
-            services.AddSingleton<IRelaySwitchService, ProgrmmaModificaStatoRelay>();
-            services.AddHostedService<ProgrmmaModificaStatoRelay>();
+            services.AddSingleton<ProgrmmaModificaStatoRelay>();
+            services.AddSingleton<IRelaySwitchService>(s=>s.GetRequiredService<ProgrmmaModificaStatoRelay>());
+            services.AddHostedService(s => s.GetRequiredService<ProgrmmaModificaStatoRelay>());
             services.AddSingleton<MemoriaStato>();
             services.AddHttpClient("ESPClient");
             services.AddSingleton<ProgrammaSettimanale>();
@@ -21,7 +22,7 @@ namespace provaweb
 
     public interface IRelaySwitchService
     {
-        bool StateRelay { get; set; }
+        bool StateRelay { get;  set; }
         string mac { get; set; }
     }
     public record ProgrammaGiornaliero(DayOfWeek Day, TimeOnly OraInizio, TimeOnly OraFine)
