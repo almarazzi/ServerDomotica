@@ -32,8 +32,7 @@ namespace provaweb
         {
 
             var f = await m_registroEsp.dammiListaEsp();
-            var lista = f.Where(x => x.Key == esp.mac).Select(x => x.Value).ToList();
-            await m_registroEsp.ModificareProgrammaEsp8266(Receiver_esp.Empty with { ipEsp = lista.Select(x => x.ipEsp).First(), MAC = esp.mac, NomeEspClient = esp.nomeEsp, abilitazione = lista.Select(x => x.abilitazione).First() });
+            await m_registroEsp.ModificareProgrammaEsp8266(f[esp.mac] with { NomeEspClient = esp.nomeEsp}, esp.mac);
             return Ok();
         }
         [HttpPut("abilitazione")]
@@ -42,8 +41,7 @@ namespace provaweb
         {
 
             var f = await m_registroEsp.dammiListaEsp();
-            var lista = f.Where(x => x.Key == abilitazione.mac).Select(x => x.Value).ToList();
-            await m_registroEsp.ModificareProgrammaEsp8266(Receiver_esp.Empty with { abilitazione = abilitazione.abilitazione, MAC = abilitazione.mac, NomeEspClient = lista.Select(x => x.NomeEspClient).First(), ipEsp = lista.Select(x => x.ipEsp).First() });
+            await m_registroEsp.ModificareProgrammaEsp8266(f[abilitazione.mac] with { abilitazione = abilitazione.abilitazione}, abilitazione.mac);
             return Ok();
         }
     }

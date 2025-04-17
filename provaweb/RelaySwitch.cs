@@ -12,24 +12,26 @@ namespace provaweb
         private readonly MemoriaStato m_memoriaStati;
         private readonly ProgrammaSettimanale m_programmaSettimanale;
         private readonly IRelaySwitchService m_relaySwitchService;
-        public RelaySwitch(ILogger<RelaySwitch> logger, MemoriaStato memoriaStato, ProgrammaSettimanale programmaSettimanale, IRelaySwitchService relaySwitchService)
+        private readonly GetStateRelay m_GetStateRelay;
+        public RelaySwitch(ILogger<RelaySwitch> logger, MemoriaStato memoriaStato, ProgrammaSettimanale programmaSettimanale, IRelaySwitchService relaySwitchService, GetStateRelay getStateRelay)
         {
             m_logger = logger;
             m_memoriaStati = memoriaStato;
             m_programmaSettimanale = programmaSettimanale;
             m_relaySwitchService = relaySwitchService;
+            m_GetStateRelay = getStateRelay;
         }
-        public record StateProgrammManu(bool stateProgrammManu,string macricever);
-        public record StateProgrammAuto(bool stateProgrammAuto,string macricever);
-        public record SetState1(bool  state, string macricever);
-        public record Oggreturn(bool state , string macricever);
+        public record StateProgrammManu(bool stateProgrammManu, string macricever);
+        public record StateProgrammAuto(bool stateProgrammAuto, string macricever);
+        public record SetState1(bool state, string macricever);
+        public record Oggreturn(bool state, string macricever);
 
 
-        public record setData(string inizio, string fine, DayOfWeek day,string mac);
+        public record setData(string inizio, string fine, DayOfWeek day, string mac);
 
         [HttpPut("SetState")]
         [Authorize]
-        public async Task<ActionResult> SetState(SetState1 setState)
+        public async Task<IActionResult> SetState(SetState1 setState)
         {
 
             var y = await m_memoriaStati.DammiStati();
@@ -40,16 +42,15 @@ namespace provaweb
                 m_relaySwitchService.mac = setState.macricever;
             }
             return Ok();
-
         }
         [HttpGet("GetState")]
         [Authorize]
 
         public async Task<IActionResult> GetState()
         {
-                var y = await m_memoriaStati.DammiStati();
-                var f = y.Select(x => new Oggreturn(x.Value.StateRelay, x.Key));
-                return Ok(f);
+            var y = await m_memoriaStati.DammiStati();
+            return Ok(y.Select(x => new Oggreturn(x.Value.StateRelay, x.Key)));
+
         }
 
         [HttpPut("stateProgrammManu")]
@@ -105,7 +106,7 @@ namespace provaweb
             {
                 fine = TimeOnly.Parse(setData.fine);
             }
-            await m_programmaSettimanale.SetProgrammaGiornaliero(ProgrammaGiornaliero.Empty with { Day = day, OraInizio = inizio, OraFine = fine },setData.mac);
+            await m_programmaSettimanale.SetProgrammaGiornaliero(ProgrammaGiornaliero.Empty with { Day = day, OraInizio = inizio, OraFine = fine }, setData.mac);
             return Ok(await m_programmaSettimanale.DammiProgrammaSettimanale());
         }
 

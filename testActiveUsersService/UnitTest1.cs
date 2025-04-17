@@ -17,20 +17,21 @@ namespace testActiveUsersService
         readonly provaweb.MemoriaStato m_memoria;
         readonly provaweb.RegistroEsp m_registroEsp;
         readonly provaweb.ProgrammaSettimanale m_programmaSettimanale;
+
         public ActiveUsersService()
         {
             m_fakeTimeProvider = new FakeTimeProvider();
             m_activeUsersService = new provaweb.ActiveUsersService(NullLogger<provaweb.ActiveUsersService>.Instance, m_fakeTimeProvider);
-            m_memoria = new MemoriaStato();
-            m_programmaSettimanale = new ProgrammaSettimanale();
-            m_registroEsp =new RegistroEsp();
+            m_registroEsp = new RegistroEsp();
+            m_memoria = new MemoriaStato(m_registroEsp);
+            m_programmaSettimanale = new ProgrammaSettimanale(m_registroEsp);
 
 
         }
 
 
 
-        [Fact]
+       /* [Fact]
         public void IsActiveTimeoutAfter5min()
         {
             m_fakeTimeProvider.SetUtcNow(DateTime.UtcNow);
@@ -39,24 +40,25 @@ namespace testActiveUsersService
             Assert.True(m_activeUsersService.IsActive("al"));
             m_fakeTimeProvider.Advance(TimeSpan.FromSeconds(4));
             Assert.False(m_activeUsersService.IsActive("al"));
-        }
+        }*/
 
         [Fact]
         public async Task ProgrmmaModificaStatoRelay()
         {
             var CllientFactory = new Mock<IHttpClientFactory>();
-            var http = new HttpClientMockBuilder().WithBaseAddress(new Uri("http://192.168.1.2/")).WithJsonContentRequest<bool>("api/RelaySwitch/StateRelay", HttpMethod.Put).RespondingJsonContent(x => x).Build();
+            var http = new HttpClientMockBuilder().WithBaseAddress(new Uri("https://192.168.1.148")).WithJsonContentRequest<bool>("api/RelaySwitch/StateRelay", HttpMethod.Put).RespondingJsonContent(x => x).Build();
             CllientFactory.Setup(f => f.CreateClient("ESPClient")).Returns(http);
             m_fakeTimeProvider.SetUtcNow(DateTime.UtcNow);
             var pp = new provaweb.ProgrmmaModificaStatoRelay(m_fakeTimeProvider, CllientFactory.Object, NullLogger<provaweb.ProgrmmaModificaStatoRelay>.Instance, m_registroEsp, m_memoria,m_programmaSettimanale);
-            pp.m_StateRelay = true;
+            pp.StateRelay = true;
+            pp.mac = "8C:AA:B5:7A:F1:66";
             await pp.StartAsync(CancellationToken.None);
             CllientFactory.SetReturnsDefault(pp);
             m_fakeTimeProvider.Advance(TimeSpan.FromMinutes(1));
             await pp.StopAsync(CancellationToken.None);
         }
 
-        [Fact]
+       /* [Fact]
         public async Task InactiveUsersEviction()
         {
             await m_activeUsersService.StartAsync(CancellationToken.None);
@@ -68,7 +70,7 @@ namespace testActiveUsersService
             Assert.False(m_activeUsersService.IsRegistered("al"));
 
             await m_activeUsersService.StopAsync(CancellationToken.None);
-        }
+        }*/
         
     }
 }

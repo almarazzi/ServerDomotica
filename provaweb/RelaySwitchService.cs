@@ -11,18 +11,20 @@ namespace provaweb
         public static IServiceCollection AddRelaySwitch(this IServiceCollection services)
         {
             services.AddSingleton<ProgrmmaModificaStatoRelay>();
-            services.AddSingleton<IRelaySwitchService>(s=>s.GetRequiredService<ProgrmmaModificaStatoRelay>());
+            services.AddSingleton<IRelaySwitchService>(s => s.GetRequiredService<ProgrmmaModificaStatoRelay>());
             services.AddHostedService(s => s.GetRequiredService<ProgrmmaModificaStatoRelay>());
             services.AddSingleton<MemoriaStato>();
             services.AddHttpClient("ESPClient");
             services.AddSingleton<ProgrammaSettimanale>();
+            services.AddSingleton<GetStateRelay>();
+            services.AddHostedService(s => s.GetRequiredService<GetStateRelay>());
             return services;
         }
     }
 
     public interface IRelaySwitchService
     {
-        bool StateRelay { get;  set; }
+        bool StateRelay { get; set; }
         string mac { get; set; }
     }
     public record ProgrammaGiornaliero(DayOfWeek Day, TimeOnly OraInizio, TimeOnly OraFine)
@@ -188,9 +190,8 @@ namespace provaweb
         }
     }
 
-    public class ProgrmmaModificaStatoRelay :BackgroundService , IRelaySwitchService
+    public class ProgrmmaModificaStatoRelay : BackgroundService, IRelaySwitchService
     {
-
         private bool m_StateRelay { get; set; }
         public bool StateRelay { get; set; }
         public string mac { get; set; } = " ";
@@ -201,7 +202,6 @@ namespace provaweb
         private readonly IHttpClientFactory HttpClientFactory;
         private readonly ILogger<ProgrmmaModificaStatoRelay> m_logger;
         private record State(bool stateRlay);
-        private record State1(int stateRlay);
         public ProgrmmaModificaStatoRelay(TimeProvider t, IHttpClientFactory clientFactory, ILogger<ProgrmmaModificaStatoRelay> logger, RegistroEsp registro, MemoriaStato memoriaStato, ProgrammaSettimanale programmaSettimanale)
         {
             m_timeProvider = t;
@@ -229,36 +229,26 @@ namespace provaweb
                 ProgrammaGiornaliero pg;
 
 
-                var ip = await m_programmaDizionarioEsp8266.IP();
+                var ip = await m_programmaDizionarioEsp8266.dammiListaEsp();
 
 
-                foreach (var item in ip.ToList())
+                foreach (var item in ip)
                 {
-                    pg = Re[item.mac][(int)d];
+                    pg = Re[item.Key][(int)d];
                     var http = HttpClientFactory.CreateClient("ESPClient");
-                    if (item.Abilitazione)
+                    if (item.Value.abilitazione)
                     {
-                        if (Ms[item.mac].StateProgrammAuto == true && Ms[item.mac].StateProgrammManu == false)
+                        if (Ms[item.Key].StateProgrammAuto == true && Ms[item.Key].StateProgrammManu == false)
                         {
                             var t = TimeOnly.FromDateTime(m_timeProvider.GetLocalNow().LocalDateTime);
-                            if (t.IsBetween(pg.OraInizio, pg.OraFine))
-                            {
-                                m_StateRelay = true;
-                            }
-                            else
-                            {
-                                m_StateRelay = false;
-                            }
+                            m_StateRelay = t.IsBetween(pg.OraInizio, pg.OraFine);
 
                         }
-                        else if (Ms[item.mac].StateProgrammAuto == false && Ms[item.mac].StateProgrammManu == true)
+                        else if (Ms[item.Key].StateProgrammAuto == false && Ms[item.Key].StateProgrammManu == true)
                         {
-                            if (mac == item.mac)
+                            if (mac == item.Key)
                             {
-                                if (StateRelay == true)
-                                    m_StateRelay = true;
-                                else
-                                    m_StateRelay = false;
+                                m_StateRelay = StateRelay;
                             }
 
                         }
@@ -272,21 +262,15 @@ namespace provaweb
                         m_StateRelay = false;
                     }
 
-                    http.BaseAddress = new Uri(item.ip);
-                    if (m_StateRelay != Ms[item.mac].StateRelay)
+                    http.BaseAddress = new Uri("http://" + item.Value.ipEsp);
+                    if (m_StateRelay != Ms[item.Key].StateRelay)
                     {
+                        await m_memoriaStati.Modifica(Ms[item.Key] with { StateRelay = m_StateRelay }, item.Key);
                         var jsonContent = new StringContent(JsonSerializer.Serialize(new State(m_StateRelay)));
                         try
                         {
-
                             using var invio = await http.PutAsync("/api/RelaySwitch/StateRelay", jsonContent, stoppingToken);
                             invio.EnsureSuccessStatusCode();
-
-                            using var p = await http.GetAsync("/api/RelaySwitch/GetStateRelay", stoppingToken);
-                            p.EnsureSuccessStatusCode();
-                            var leggi = await p.Content.ReadAsStringAsync();
-                            var g = JsonSerializer.Deserialize<State1>(leggi);
-                            await m_memoriaStati.Modifica(Ms[item.mac] with { StateRelay = (g!.stateRlay == 1 ? true : false) }, item.mac);
 
                         }
                         catch (HttpRequestException ex)
@@ -294,47 +278,67 @@ namespace provaweb
                             m_logger.LogWarning(ex.Message);
                         }
                     }
+
                 }
             }
         }
     }
+    public record State(bool stateRlay);
+    public class GetStateRelay(IHttpClientFactory httpClient, TimeProvider timeProvider, ILogger<GetStateRelay> logger, RegistroEsp registroEsp, MemoriaStato memoriaStato) : BackgroundService
+    {
+        private readonly IHttpClientFactory m_httpClientFactory = httpClient;
+        private readonly TimeProvider m_timeProvider = timeProvider;
+        private readonly ILogger<GetStateRelay> m_logger = logger;
+        private readonly RegistroEsp m_registroEsp = registroEsp;
+        private readonly MemoriaStato m_memoriaStati = memoriaStato;
+        public bool Isonline;
+
+        protected override async Task ExecuteAsync(CancellationToken stoppingToken)
+        {
+
+            while (!stoppingToken.IsCancellationRequested)
+            {
+                var http = m_httpClientFactory.CreateClient("ESPClient");
+                var f = await m_memoriaStati.DammiStati();
+                foreach (var item in await m_registroEsp.dammiListaEsp())
+                {
+                    http.BaseAddress = new Uri("http://" + item.Value.ipEsp);
+                    try
+                    {
+
+                        using var t = CancellationTokenSource.CreateLinkedTokenSource(stoppingToken);
+                        t.CancelAfter(TimeSpan.FromSeconds(5));
+                        using var p = await http.GetAsync("/api/RelaySwitch/GetStateRelay", stoppingToken);
+                        Isonline = p.IsSuccessStatusCode;
+                        if (Isonline)
+                        {
+                            p.EnsureSuccessStatusCode();
+                            var leggi = await p.Content.ReadAsStringAsync();
+                            var g = JsonSerializer.Deserialize<State>(leggi)!.stateRlay;
+                            await m_memoriaStati.Modifica(f[item.Key] with { StateRelay = g }, item.Key);
+                        }
+                        else
+                        {
+
+                        }
 
 
 
+                    }
+                    catch (HttpRequestException ex)
+                    {
+                        m_logger.LogWarning(ex.Message);
 
+                    }
+                    catch (TaskCanceledException ex)
+                    {
+                        m_logger.LogWarning(ex.Message);
+                    }
+                }
+                await m_timeProvider.Delay(TimeSpan.FromSeconds(1), stoppingToken);
+            }
+        }
 
-    /*   public class RelaySwitchServiceGPIO //: IRelaySwitchService, //IDisposable
-       {
-           const int pinNumber = 26;
-           private readonly GpioController m_controller;
-           private readonly GpioPin m_pin;
-           public RelaySwitchServiceGPIO()
-           {
-               m_controller = new GpioController();
-               m_pin = m_controller.OpenPin(pinNumber, PinMode.Output);
-               m_state = m_pin.Read() == PinValue.High;
-           }
-
-           private bool m_state;
-           public bool State
-           {
-               get => m_state;
-               set
-               {
-                   if (m_state != value)
-                   {
-                       m_state = value;
-                       //using var controller = new GpioController();
-                       //m_controller.OpenPin(pinNumber, PinMode.Output);
-                       m_pin.Write(m_state == true ? PinValue.High : PinValue.Low);
-                   }
-               }
-           }
-
-           public void Dispose()
-           {
-               m_controller.ClosePin(pinNumber);
-               m_controller.Dispose();
-           }
-       }*/
+    }
 }
+

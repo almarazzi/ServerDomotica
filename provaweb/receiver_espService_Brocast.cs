@@ -2,6 +2,7 @@
 using System.Collections.Concurrent;
 using System.Net;
 using System.Net.Sockets;
+using System.Security.Cryptography;
 using System.Text;
 using System.Text.Json;
 
@@ -40,11 +41,12 @@ namespace provaweb
             {
                 var receive = await m_UDPClient.ReceiveAsync(stoppingToken);
                 var Mac = Encoding.ASCII.GetString(receive.Buffer);
-                //m_UDPClient.Close();
+                var s = "ok";
+                await m_UDPClient.SendAsync(Encoding.ASCII.GetBytes(s),s.Length, receive.RemoteEndPoint.Address.ToString(),8888);
                 var f = await m_registroEsp.dammiListaEsp();
                 var nome = f.Where(x => x.Key == Mac).Select(x => x.Value.NomeEspClient).FirstOrDefault();
                 var abi = f.Where(x => x.Key == Mac).Select(x => x.Value.abilitazione).FirstOrDefault();
-                await m_registroEsp.ModificareProgrammaEsp8266(Receiver_esp.Empty with { MAC = Mac, ipEsp = receive.RemoteEndPoint.Address.ToString(), NomeEspClient = (nome != null ? nome : "esp"), abilitazione = abi });
+                await m_registroEsp.ModificareProgrammaEsp8266(Value_Esp8266.Empty with { ipEsp = receive.RemoteEndPoint.Address.ToString(), NomeEspClient = (nome != null ? nome : "esp"), abilitazione = abi }, Mac);
 
             }
 
@@ -56,11 +58,6 @@ namespace provaweb
     {
         public static readonly Value_Esp8266 Empty = new("", "", false);
     }
-    public record Receiver_esp(string MAC, string NomeEspClient, string ipEsp, bool abilitazione)
-    {
-        public static readonly Receiver_esp Empty = new("", "", "", false);
-    }
-    public record Ip(string ip, bool Abilitazione, string mac);
 
     public class RegistroEsp
     {
@@ -94,16 +91,6 @@ namespace provaweb
             return f;
 
         }
-        public async Task<List<Ip>> IP()
-        {
-            var d = await m_ProgrammaEsp8266.WithCancellation(CancellationToken.None);
-            List<Ip> f = new List<Ip>();
-            foreach (var item in d)
-            {
-                f.Add(new Ip(ip: "http://" + item.Value.ipEsp, Abilitazione: item.Value.abilitazione, mac: item.Key));
-            }
-            return f;
-        }
 
         private async Task SalvareProgrammaEsp8266()
         {
@@ -114,7 +101,7 @@ namespace provaweb
                 await File.WriteAllTextAsync(s_percorso, ProgrammaDizionarioEsp8266Serializato);
             }
         }
-        public async Task ModificareProgrammaEsp8266(Receiver_esp re)
+        public async Task ModificareProgrammaEsp8266(Value_Esp8266 re, string MAC)
         {
             using (await _lock.AcquireLockAsync(CancellationToken.None))
             {
@@ -125,7 +112,7 @@ namespace provaweb
                 else
                 {
                     var f = await m_ProgrammaEsp8266.WithCancellation(CancellationToken.None);
-                    f[re.MAC] = new Value_Esp8266(NomeEspClient: re.NomeEspClient, ipEsp: re.ipEsp, abilitazione: re.abilitazione);
+                    f[MAC] = new Value_Esp8266(NomeEspClient: re.NomeEspClient, ipEsp: re.ipEsp, abilitazione: re.abilitazione);
                     await SalvareProgrammaEsp8266();
 
                 }
