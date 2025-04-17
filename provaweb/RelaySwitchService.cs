@@ -308,7 +308,7 @@ namespace provaweb
 
                         using var t = CancellationTokenSource.CreateLinkedTokenSource(stoppingToken);
                         t.CancelAfter(TimeSpan.FromSeconds(5));
-                        using var p = await http.GetAsync("/api/RelaySwitch/GetStateRelay", stoppingToken);
+                        using var p = await http.GetAsync("/api/RelaySwitch/GetStateRelay", t.Token);
                         Isonline = p.IsSuccessStatusCode;
                         if (Isonline)
                         {
