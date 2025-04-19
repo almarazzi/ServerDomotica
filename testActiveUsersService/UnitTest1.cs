@@ -26,12 +26,11 @@ namespace testActiveUsersService
             m_memoria = new MemoriaStato(m_registroEsp);
             m_programmaSettimanale = new ProgrammaSettimanale(m_registroEsp);
 
-
         }
 
 
 
-       /* [Fact]
+       [Fact]
         public void IsActiveTimeoutAfter5min()
         {
             m_fakeTimeProvider.SetUtcNow(DateTime.UtcNow);
@@ -40,25 +39,25 @@ namespace testActiveUsersService
             Assert.True(m_activeUsersService.IsActive("al"));
             m_fakeTimeProvider.Advance(TimeSpan.FromSeconds(4));
             Assert.False(m_activeUsersService.IsActive("al"));
-        }*/
+        }
 
-        [Fact]
+        /*[Fact]
         public async Task ProgrmmaModificaStatoRelay()
         {
             var CllientFactory = new Mock<IHttpClientFactory>();
             var http = new HttpClientMockBuilder().WithBaseAddress(new Uri("https://192.168.1.148")).WithJsonContentRequest<bool>("api/RelaySwitch/StateRelay", HttpMethod.Put).RespondingJsonContent(x => x).Build();
             CllientFactory.Setup(f => f.CreateClient("ESPClient")).Returns(http);
             m_fakeTimeProvider.SetUtcNow(DateTime.UtcNow);
-            var pp = new provaweb.ProgrmmaModificaStatoRelay(m_fakeTimeProvider, CllientFactory.Object, NullLogger<provaweb.ProgrmmaModificaStatoRelay>.Instance, m_registroEsp, m_memoria,m_programmaSettimanale);
+            var pp = new provaweb.ProgrmmaModificaStatoRelay(m_fakeTimeProvider, CllientFactory.Object, NullLogger<provaweb.ProgrmmaModificaStatoRelay>.Instance, m_registroEsp, m_memoria,m_programmaSettimanale,GetStateRelay State);
             pp.StateRelay = true;
             pp.mac = "8C:AA:B5:7A:F1:66";
             await pp.StartAsync(CancellationToken.None);
             CllientFactory.SetReturnsDefault(pp);
             m_fakeTimeProvider.Advance(TimeSpan.FromMinutes(1));
             await pp.StopAsync(CancellationToken.None);
-        }
+        }*/
 
-       /* [Fact]
+        [Fact]
         public async Task InactiveUsersEviction()
         {
             await m_activeUsersService.StartAsync(CancellationToken.None);
@@ -70,7 +69,7 @@ namespace testActiveUsersService
             Assert.False(m_activeUsersService.IsRegistered("al"));
 
             await m_activeUsersService.StopAsync(CancellationToken.None);
-        }*/
+        }
         
     }
 }
