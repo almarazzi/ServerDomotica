@@ -9,12 +9,13 @@ namespace provaweb
     {
         private readonly ILogger<apiEsp> m_logger;
         private readonly RegistroEsp m_registroEsp;
+        private readonly ContorolloEspOnline m_stateRelay;
 
-        public apiEsp(ILogger<apiEsp> logger, RegistroEsp registro)
+        public apiEsp(ILogger<apiEsp> logger, RegistroEsp registro, ContorolloEspOnline stateRelay)
         {
             m_logger = logger;
             m_registroEsp = registro;
-
+            m_stateRelay = stateRelay;
         }
 
         public record ESP(string nomeEsp, string mac);
@@ -43,6 +44,14 @@ namespace provaweb
             var f = await m_registroEsp.dammiListaEsp();
             await m_registroEsp.ModificareProgrammaEsp8266(f[abilitazione.mac] with { abilitazione = abilitazione.abilitazione}, abilitazione.mac);
             return Ok();
+        }
+        [HttpGet("StatoRelay")]
+        [Authorize]
+        public IActionResult StatoRelay()
+        {
+
+            var f =  m_stateRelay.Offline;
+            return Ok(f);
         }
     }
 }
