@@ -7,11 +7,13 @@ interface Tutto {
     state: boolean,
     macricever: string
 }
+
 export function ComponenteEsp(props: { mac: string, ip: string, abilitazioe: boolean, nome: string }) {
     const [nomeEsp, SetnomeEsp] = useState("");
     const [mac, Setmac] = useState("");
     const [focus, setFocus] = useState(false);
     const [abilitazione, setAbilitazione] = useState(false);//setAbilitazione
+    const [Isofline, setIsoffline] = useState(true);//setAbilitazione
     const [M, setM] = useState(false);
     const [A, setA] = useState(false);
 
@@ -92,6 +94,38 @@ export function ComponenteEsp(props: { mac: string, ip: string, abilitazioe: boo
         };
     }, []);
 
+    useEffect(() => {
+        let isactive = true;
+        const fetchData = async () => {
+            let data = await fetch("/apiEsp/StatoRelay", { method: 'GET', headers: { 'Content-type': 'application/json; charl set=UTF-8' } });
+            var res = await data.json() as [];
+            if (isactive) {
+                {
+                    res.map((u, _) => {
+                        if (u === props.mac) {
+                            setIsoffline(true);
+                        }else
+                        {
+                            setIsoffline(false);
+                        }
+                    })
+                    if (res.length === 0)
+                    {
+                    setIsoffline(false);
+                    }
+                }
+                setTimeout(() => {
+                    fetchData();
+
+                }, 500);
+            }
+        };
+        fetchData();
+        return () => {
+            isactive = false;
+        };
+    }, [Isofline]);
+
     return (
         <div className="ccccc" >
             <DebounceInput
@@ -115,6 +149,7 @@ export function ComponenteEsp(props: { mac: string, ip: string, abilitazioe: boo
 
             <div className="ip">IP:{props.ip}</div>
             <div className="mac">MAC:{props.mac}</div>
+            <div className="ip">Stato Relay:{(Isofline === true ? "Offline" : "Online")}</div>
             <div className="componenteAutoManu">
                 <input className="form-check-input casellaAuto" type="checkbox" checked={A} onChange={p1} id="invalidCheck1" required />
 
