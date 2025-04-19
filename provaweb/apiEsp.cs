@@ -47,7 +47,7 @@ namespace provaweb
         }
         [HttpGet("StatoRelay")]
         [Authorize]
-        public IActionResult StatoRelay()
+        public IActionResult StatoEsp()
         {
 
             var f =  m_stateRelay.Offline;
