@@ -1,5 +1,6 @@
 ﻿using DotNext.Threading;
 using System.Collections.Concurrent;
+using System.Collections.Immutable;
 using System.Text.Json;
 
 
@@ -16,8 +17,8 @@ namespace provaweb
             services.AddSingleton<MemoriaStato>();
             services.AddHttpClient("ESPClient");
             services.AddSingleton<ProgrammaSettimanale>();
-            services.AddSingleton<GetStateRelay>();
-            services.AddHostedService(s => s.GetRequiredService<GetStateRelay>());
+            services.AddSingleton<ContorolloEspOnline>();
+            services.AddHostedService(s => s.GetRequiredService<ContorolloEspOnline>());
             return services;
         }
     }
@@ -194,15 +195,16 @@ namespace provaweb
     {
         private bool m_StateRelay { get; set; }
         public bool StateRelay { get; set; }
-        public string mac { get; set; } = " ";
+        public string mac { get; set; } = "";
         private readonly MemoriaStato m_memoriaStati;
         private readonly ProgrammaSettimanale m_programmaSettimanale;
         private readonly RegistroEsp m_programmaDizionarioEsp8266;
         private readonly TimeProvider m_timeProvider;
         private readonly IHttpClientFactory HttpClientFactory;
         private readonly ILogger<ProgrmmaModificaStatoRelay> m_logger;
+        private readonly ContorolloEspOnline m_stateRelayGet;
         private record State(bool stateRlay);
-        public ProgrmmaModificaStatoRelay(TimeProvider t, IHttpClientFactory clientFactory, ILogger<ProgrmmaModificaStatoRelay> logger, RegistroEsp registro, MemoriaStato memoriaStato, ProgrammaSettimanale programmaSettimanale)
+        public ProgrmmaModificaStatoRelay(TimeProvider t, IHttpClientFactory clientFactory, ILogger<ProgrmmaModificaStatoRelay> logger, RegistroEsp registro, MemoriaStato memoriaStato, ProgrammaSettimanale programmaSettimanale, ContorolloEspOnline stateRelay)
         {
             m_timeProvider = t;
             HttpClientFactory = clientFactory;
@@ -210,6 +212,7 @@ namespace provaweb
             m_programmaDizionarioEsp8266 = registro;
             m_memoriaStati = memoriaStato;
             m_programmaSettimanale = programmaSettimanale;
+            m_stateRelayGet = stateRelay;
         }
 
         protected override async Task ExecuteAsync(CancellationToken stoppingToken)
@@ -217,13 +220,17 @@ namespace provaweb
 
             while (!stoppingToken.IsCancellationRequested)
             {
-
+                if(string.IsNullOrEmpty(mac))
+                {
+                    await m_timeProvider.Delay(TimeSpan.FromMilliseconds(100), stoppingToken);
+                    continue;
+                }
                 var Ms = await m_memoriaStati.DammiStati();
                 var Re = await m_programmaSettimanale.DammiProgrammaSettimanale();
                 if (Ms.Count == 0 || Re.Count == 0)
                 {
-                    await Task.Delay(100, stoppingToken);
-                    break;
+                    await m_timeProvider.Delay(TimeSpan.FromMilliseconds(100), stoppingToken);
+                    continue;
                 }
                 var d = m_timeProvider.GetLocalNow().DayOfWeek;
                 ProgrammaGiornaliero pg;
@@ -231,111 +238,113 @@ namespace provaweb
 
                 var ip = await m_programmaDizionarioEsp8266.dammiListaEsp();
 
-
-                foreach (var item in ip)
+                pg = Re[mac][(int)d];
+                using var http = HttpClientFactory.CreateClient("ESPClient");
+                http.BaseAddress = new Uri("http://" + ip[mac].ipEsp);
+                if (ip[mac].abilitazione)
                 {
-                    pg = Re[item.Key][(int)d];
-                    var http = HttpClientFactory.CreateClient("ESPClient");
-                    if (item.Value.abilitazione)
+                    if (Ms[mac].StateProgrammAuto == true && Ms[mac].StateProgrammManu == false)
                     {
-                        if (Ms[item.Key].StateProgrammAuto == true && Ms[item.Key].StateProgrammManu == false)
-                        {
-                            var t = TimeOnly.FromDateTime(m_timeProvider.GetLocalNow().LocalDateTime);
-                            m_StateRelay = t.IsBetween(pg.OraInizio, pg.OraFine);
+                        var t = TimeOnly.FromDateTime(m_timeProvider.GetLocalNow().LocalDateTime);
+                        m_StateRelay = t.IsBetween(pg.OraInizio, pg.OraFine);
 
-                        }
-                        else if (Ms[item.Key].StateProgrammAuto == false && Ms[item.Key].StateProgrammManu == true)
-                        {
-                            if (mac == item.Key)
-                            {
-                                m_StateRelay = StateRelay;
-                            }
-
-                        }
-                        else
-                        {
-                            m_StateRelay = false;
-                        }
+                    }
+                    else if (Ms[mac].StateProgrammAuto == false && Ms[mac].StateProgrammManu == true)
+                    {
+                        m_StateRelay = StateRelay;
                     }
                     else
                     {
                         m_StateRelay = false;
                     }
-
-                    http.BaseAddress = new Uri("http://" + item.Value.ipEsp);
-                    if (m_StateRelay != Ms[item.Key].StateRelay)
-                    {
-                        await m_memoriaStati.Modifica(Ms[item.Key] with { StateRelay = m_StateRelay }, item.Key);
-                        var jsonContent = new StringContent(JsonSerializer.Serialize(new State(m_StateRelay)));
-                        try
-                        {
-                            using var invio = await http.PutAsync("/api/RelaySwitch/StateRelay", jsonContent, stoppingToken);
-                            invio.EnsureSuccessStatusCode();
-
-                        }
-                        catch (HttpRequestException ex)
-                        {
-                            m_logger.LogWarning(ex.Message);
-                        }
-                    }
-
                 }
-            }
-        }
-    }
-    public record State(bool stateRlay);
-    public class GetStateRelay(IHttpClientFactory httpClient, TimeProvider timeProvider, ILogger<GetStateRelay> logger, RegistroEsp registroEsp, MemoriaStato memoriaStato) : BackgroundService
-    {
-        private readonly IHttpClientFactory m_httpClientFactory = httpClient;
-        private readonly TimeProvider m_timeProvider = timeProvider;
-        private readonly ILogger<GetStateRelay> m_logger = logger;
-        private readonly RegistroEsp m_registroEsp = registroEsp;
-        private readonly MemoriaStato m_memoriaStati = memoriaStato;
-        public bool Isonline;
-
-        protected override async Task ExecuteAsync(CancellationToken stoppingToken)
-        {
-
-            while (!stoppingToken.IsCancellationRequested)
-            {
-                var http = m_httpClientFactory.CreateClient("ESPClient");
-                var f = await m_memoriaStati.DammiStati();
-                foreach (var item in await m_registroEsp.dammiListaEsp())
+                else
                 {
-                    http.BaseAddress = new Uri("http://" + item.Value.ipEsp);
+                    m_StateRelay = false;
+                }
+                if (m_stateRelayGet.Offline.Contains(mac))
+                {
+                    await m_memoriaStati.Modifica(Ms[mac] with { StateRelay = false }, mac);
+                    continue;
+                }
+
+                if (m_StateRelay != Ms[mac].StateRelay)
+                {
+                    await m_memoriaStati.Modifica(Ms[mac] with { StateRelay = m_StateRelay }, mac);
+                    var jsonContent = new StringContent(JsonSerializer.Serialize(new State(m_StateRelay)));
                     try
                     {
-
-                        using var t = CancellationTokenSource.CreateLinkedTokenSource(stoppingToken);
-                        t.CancelAfter(TimeSpan.FromSeconds(5));
-                        using var p = await http.GetAsync("/api/RelaySwitch/GetStateRelay", t.Token);
-                        Isonline = p.IsSuccessStatusCode;
-                        if (Isonline)
-                        {
-                            p.EnsureSuccessStatusCode();
-                            var leggi = await p.Content.ReadAsStringAsync();
-                            var g = JsonSerializer.Deserialize<State>(leggi)!.stateRlay;
-                            await m_memoriaStati.Modifica(f[item.Key] with { StateRelay = g }, item.Key);
-                        }
-                        else
-                        {
-
-                        }
-
-
-
+                        using var invio = await http.PutAsync("/api/RelaySwitch/StateRelay", jsonContent, stoppingToken);
                     }
                     catch (HttpRequestException ex)
                     {
                         m_logger.LogWarning(ex.Message);
-
-                    }
-                    catch (TaskCanceledException ex)
-                    {
-                        m_logger.LogWarning(ex.Message);
                     }
                 }
-                await m_timeProvider.Delay(TimeSpan.FromSeconds(1), stoppingToken);
+            }
+        }
+    }
+
+    public class ContorolloEspOnline(IHttpClientFactory httpClient, TimeProvider timeProvider, ILogger<ContorolloEspOnline> logger, RegistroEsp registroEsp) : BackgroundService
+    {
+        private readonly Dictionary<string, long> m_EspOffline = new();
+        //public Dictionary<string, long> Offline => m_EspOffline;
+
+        //private readonly ImmutableDictionary<string, long>.Builder m_EspOffline = ImmutableDictionary.CreateBuilder<string, long>();
+        //public IReadOnlyDictionary<string, long> Offline = ImmutableDictionary<string, long>.Empty;
+        //public IReadOnlySet<string> Offline = ImmutableHashSet<string>.Empty;
+        public IReadOnlyList<string> Offline = Array.Empty<string>();
+
+
+        private async Task<(string key, bool result)> TestItem(string key, string ipEsp, CancellationToken stoppingToken)
+        {
+            using var http = httpClient.CreateClient("ESPClient");
+            http.BaseAddress = new Uri("http://" + ipEsp);
+            http.Timeout = TimeSpan.FromSeconds(3);
+            try
+            {
+                using var p = await http.GetAsync("/api/RelaySwitch/ping", stoppingToken);
+                return (key, true);
+
+            }
+            catch (TaskCanceledException ex)
+            {
+                logger.LogWarning(ex.Message);
+            }
+            return (key, false);
+        }
+
+        protected override async Task ExecuteAsync(CancellationToken stoppingToken)
+        {
+            while (!stoppingToken.IsCancellationRequested)
+            {
+                var resultTasks = new List<Task<(string key, bool result)>>();
+                foreach (var item in await registroEsp.dammiListaEsp())
+                {
+                    if (m_EspOffline.TryGetValue(item.Key, out long value))
+                    {
+                        if (timeProvider.GetElapsedTime(value).TotalSeconds < 10)
+                        {
+                            continue;
+                        }
+                    }
+                    resultTasks.Add(TestItem(item.Key, item.Value.ipEsp, stoppingToken));
+                }
+
+                var tNow = timeProvider.GetTimestamp();
+                await Task.WhenAll(resultTasks);
+
+                foreach (var r in resultTasks)
+                {
+                    if (r.Result.result)
+                        m_EspOffline.Remove(r.Result.key, out long _);
+                    else
+                        m_EspOffline[r.Result.key] = tNow;
+                }
+
+                Offline = m_EspOffline.Keys.ToImmutableArray();
+
+                await timeProvider.Delay(TimeSpan.FromSeconds(1), stoppingToken);
             }
         }
 
