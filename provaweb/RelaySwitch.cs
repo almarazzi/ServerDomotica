@@ -12,14 +12,12 @@ namespace provaweb
         private readonly MemoriaStato m_memoriaStati;
         private readonly ProgrammaSettimanale m_programmaSettimanale;
         private readonly IRelaySwitchService m_relaySwitchService;
-        private readonly GetStateRelay m_GetStateRelay;
-        public RelaySwitch(ILogger<RelaySwitch> logger, MemoriaStato memoriaStato, ProgrammaSettimanale programmaSettimanale, IRelaySwitchService relaySwitchService, GetStateRelay getStateRelay)
+        public RelaySwitch(ILogger<RelaySwitch> logger, MemoriaStato memoriaStato, ProgrammaSettimanale programmaSettimanale, IRelaySwitchService relaySwitchService)
         {
             m_logger = logger;
             m_memoriaStati = memoriaStato;
             m_programmaSettimanale = programmaSettimanale;
             m_relaySwitchService = relaySwitchService;
-            m_GetStateRelay = getStateRelay;
         }
         public record StateProgrammManu(bool stateProgrammManu, string macricever);
         public record StateProgrammAuto(bool stateProgrammAuto, string macricever);
@@ -36,7 +34,7 @@ namespace provaweb
 
             var y = await m_memoriaStati.DammiStati();
             var f = y.Where(x => x.Key == setState.macricever).Select(x => x.Value.StateProgrammManu).First();
-            if (f == true)
+            if (f == true )
             {
                 m_relaySwitchService.StateRelay = setState.state;
                 m_relaySwitchService.mac = setState.macricever;
