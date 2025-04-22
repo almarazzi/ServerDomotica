@@ -288,8 +288,6 @@ namespace provaweb
     public class ContorolloEspOnline(IHttpClientFactory httpClient, TimeProvider timeProvider, ILogger<ContorolloEspOnline> logger, RegistroEsp registroEsp) : BackgroundService
     {
         private readonly Dictionary<string, long> m_EspOffline = new();
-        //public Dictionary<string, long> Offline => m_EspOffline;
-
         //private readonly ImmutableDictionary<string, long>.Builder m_EspOffline = ImmutableDictionary.CreateBuilder<string, long>();
         //public IReadOnlyDictionary<string, long> Offline = ImmutableDictionary<string, long>.Empty;
         //public IReadOnlySet<string> Offline = ImmutableHashSet<string>.Empty;
