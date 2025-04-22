@@ -5,28 +5,28 @@ using System.Data;
 
 namespace provaDatabase
 {
-    internal class Databaselogic
+
+    public static class AddserviceDatabase
+    {
+        public static IServiceCollection addServiceDatabase(this IServiceCollection services)
+        {
+            services.AddDbContext<BloggingContext>();
+            services.AddScoped<Databaselogic>();
+            return services;
+        }
+    }
+    public class Databaselogic(BloggingContext db)
     {
         public record Oggect(string Role, bool V);
-
-        public Databaselogic()
-        {
-
-        }
-
-
         public async Task AgiuntaAccount(string nomeUtente, string ruolo, string password)
         {
-            using var db = new BloggingContext();
             string f = new PasswordHasher<object>().HashPassword(null!, password);
             await db.AddAsync(new Users { UserName = nomeUtente, Ruolo = ruolo, Password = f, StatoAccount = true });
             await db.SaveChangesAsync();
-            
+
         }
         public async Task AggiornamnetoPassword(string nomeUtente, string vecchiaPassword, string nuovaPassword)
         {
-            using var db = new BloggingContext();
-
             var dd = await db.Users.Where(x => x.UserName == nomeUtente).FirstOrDefaultAsync();
             if (dd == null)
                 return;
@@ -41,8 +41,6 @@ namespace provaDatabase
 
         public async Task<Oggect> VerificaAccount(string nomeUtente, string password)
         {
-            using var db = new BloggingContext();
-
             if (nomeUtente == "root" && password == "root")
             {
                 var hasUsers = await db.Users.AnyAsync();
@@ -67,7 +65,7 @@ namespace provaDatabase
 
                 return new Oggect(dd.Ruolo, res == PasswordVerificationResult.Success || res == PasswordVerificationResult.SuccessRehashNeeded);
             }
-           
+
             return new Oggect("", false);
 
 
@@ -75,13 +73,11 @@ namespace provaDatabase
 
         public Task<List<Users>> UtentiDatabase1()
         {
-            using var db = new BloggingContext();
             return db.Users.ToListAsync();
         }
 
         public async Task StatoAccount(string Nomeutente, bool StatoAccount)
         {
-            using var db = new BloggingContext();
             var dd = await db.Users.Where(x => x.UserName == Nomeutente).FirstOrDefaultAsync();
 
             if (dd != null)
@@ -94,12 +90,9 @@ namespace provaDatabase
 
         public async Task<bool> ConfermaStato(string Nomeutente)
         {
-            using var db = new BloggingContext();
             return await db.Users.Where(x => x.UserName == Nomeutente).Select(x => x.StatoAccount).FirstOrDefaultAsync();
 
         }
-
-       
 
     }
 }
