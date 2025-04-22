@@ -16,11 +16,12 @@ namespace provaweb.Controllers
     public class Login : ControllerBase
     {
         private readonly ILogger<Login> m_logger;
+        private readonly Databaselogic dblogic;
 
-        public Login(ILogger<Login> logger)
+        public Login(ILogger<Login> logger, Databaselogic databaselogic)
         {
             m_logger = logger;
-
+            dblogic = databaselogic;
         }
 
         public record UserCredentials(string username, string password);
@@ -34,10 +35,8 @@ namespace provaweb.Controllers
         [Authorize]
         public async Task<IActionResult> Autenticazione()
         {
-
-            var database = new Databaselogic();
             if (User.Identity!.Name! == "root") return Ok();
-            var f = await database.ConfermaStato(User.Identity!.Name!);
+            var f = await dblogic.ConfermaStato(User.Identity!.Name!);
             if (f == true) return Ok();
             await HttpContext.SignOutAsync(scheme: CookieAuthenticationDefaults.AuthenticationScheme);
             return StatusCode(404);
@@ -49,15 +48,14 @@ namespace provaweb.Controllers
             var username = UserCredentials.username;
             var password = UserCredentials.password;
             var f = false;
-            var database = new Databaselogic();
-            var r = await database.VerificaAccount(username, password);
+            var r = await dblogic.VerificaAccount(username, password);
             if (r.Role == "root")
             {
                 f = true;
             }
             else
             {
-                f = await database.ConfermaStato(username);
+                f = await dblogic.ConfermaStato(username);
             }
             if (f == true)
             {
@@ -70,23 +68,16 @@ namespace provaweb.Controllers
                         new Claim(ClaimTypes.Role,r.Role),
 
                     };
-                    var claimsIdentity = new ClaimsIdentity(
-                        claims,
-                        CookieAuthenticationDefaults.AuthenticationScheme);
+                    var claimsIdentity = new ClaimsIdentity(claims,CookieAuthenticationDefaults.AuthenticationScheme);
                     var claimsPrincipal = new ClaimsPrincipal(claimsIdentity);
 
                     var authProperties = new AuthenticationProperties
                     {
                         IsPersistent = true,
-                        ExpiresUtc = DateTimeOffset.UtcNow.AddDays(365),
+                        ExpiresUtc = DateTimeOffset.UtcNow.AddYears(1),
                         AllowRefresh = true,
-
                     };
-
-                    await HttpContext.SignInAsync(
-                        CookieAuthenticationDefaults.AuthenticationScheme,
-                        new ClaimsPrincipal(claimsIdentity), authProperties);
-
+                    await HttpContext.SignInAsync(CookieAuthenticationDefaults.AuthenticationScheme, new ClaimsPrincipal(claimsIdentity), authProperties);
                     return Ok();
                 }
             }
@@ -108,12 +99,11 @@ namespace provaweb.Controllers
             var password = NewUser.password;
             var username = NewUser.username;
             var am = NewUser.am;
-            var database = new Databaselogic();
             if (am == true)
             {
                 try
                 {
-                    await database.AgiuntaAccount(username, "Admin", password);
+                    await dblogic.AgiuntaAccount(username, "Admin", password);
                 }
                 catch (DbUpdateException)
                 {
@@ -124,7 +114,7 @@ namespace provaweb.Controllers
             {
                 try
                 {
-                    await database.AgiuntaAccount(username, "Basic", password);
+                    await dblogic.AgiuntaAccount(username, "Basic", password);
                 }
                 catch (DbUpdateException)
                 {
@@ -132,7 +122,7 @@ namespace provaweb.Controllers
                 }
             }
             var isroot = User.Claims.Where(x => x.Type == ClaimTypes.Name).Select(x => x.Value == "root").First();
-            var u = await database.UtentiDatabase1();
+            var u = await dblogic.UtentiDatabase1();
             if (isroot && u.Any())
             {
                 await HttpContext.SignOutAsync(scheme: CookieAuthenticationDefaults.AuthenticationScheme);
@@ -154,32 +144,30 @@ namespace provaweb.Controllers
         [Authorize(Roles = "Admin")]
         public async Task<ActionResult<IEnumerable<UserDatabase>>> Getlistuser([FromServices] ActiveUsersService activeUsers)
         {
-            var database = new Databaselogic();
-            var u = await database.UtentiDatabase1();
+            var u = await dblogic.UtentiDatabase1();
             return Ok(u.Select(x => new UserDatabase(x.UserName, x.Ruolo, activeUsers.IsActive(x.UserName), x.StatoAccount)));
         }
 
         [HttpPut("StatoAccount")]
         [Authorize(Roles = "Admin")]
-        public async Task<ActionResult> StatoAccount(StatoAccount1 statoAccount1)
+        public async Task<IActionResult> StatoAccount(StatoAccount1 statoAccount1)
         {
             var username = statoAccount1.Username;
             var StatoAccount = statoAccount1.StatoAccount;
-            var database = new Databaselogic();
-            await database.StatoAccount(username, StatoAccount);
+            await dblogic.StatoAccount(username, StatoAccount);
             return Ok();
 
         }
 
         [HttpPut("cambiaPassword")]
         [Authorize(Roles = "Admin,Basic")]
-        public Task CambiaPassword(UserChangePassword UserChangePassword)
+        public async Task<IActionResult> CambiaPassword(UserChangePassword UserChangePassword)
         {
             var nomeutente = UserChangePassword.Username;
             var passwordvecchia = UserChangePassword.PasswordAtt;
             var passwordnuova = UserChangePassword.PasswordNuv;
-            var database = new Databaselogic();
-            return database.AggiornamnetoPassword(nomeutente, passwordvecchia, passwordnuova);
+            await dblogic.AggiornamnetoPassword(nomeutente, passwordvecchia, passwordnuova);
+            return Ok();
         }
 
 
