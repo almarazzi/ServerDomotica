@@ -1,25 +1,20 @@
 using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.DataProtection;
 using Microsoft.Extensions.FileProviders;
+using provaDatabase;
 using provaweb;
 using System.Reflection;
 
+// Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
 var builder = WebApplication.CreateBuilder(args);
-//var xxxx = new ActiveUsersService();
 builder.Services.AddSingleton(TimeProvider.System);
 builder.Services.AddSingleton<ActiveUsersService>();
 builder.Services.AddHostedService(sp => sp.GetRequiredService<ActiveUsersService>());
 builder.Services.AddRelaySwitch();
 builder.Services.Addreceiver_esp8266Service();
-//builder.Services.AddSingleton<IProxyConfigProvider>(new Proxy()).AddReverseProxy();
-//builder.Services.AddHostedService(sp => sp.GetRequiredService<ActiveUsersService>());
-// Add services to the container.
+builder.Services.addServiceDatabase();
 builder.Services.AddControllers();
-// Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
 builder.Services.AddEndpointsApiExplorer();
-//builder.Services.AddProxies();
-/*builder.Services.AddReverseProxy().
-    LoadFromConfig(builder.Configuration.GetSection("proxy"));*/
 builder.Services.AddHttpClient();
 builder.Services.AddSwaggerGen();
 var programData = Environment.GetFolderPath(Environment.SpecialFolder.CommonApplicationData);
@@ -41,9 +36,8 @@ builder.Services.AddAuthentication(CookieAuthenticationDefaults.AuthenticationSc
     options.Cookie.HttpOnly = true;
     options.Cookie.SameSite = SameSiteMode.Strict;
     options.ReturnUrlParameter = "esp8266";
-    options.SlidingExpiration = true;
-    options.Cookie.MaxAge = TimeSpan.FromDays(365);
     options.ExpireTimeSpan = TimeSpan.FromDays(365);
+    options.SlidingExpiration = false;
     options.Events = new CookieAuthenticationEvents
     {
 
@@ -63,7 +57,7 @@ builder.Services.AddAuthentication(CookieAuthenticationDefaults.AuthenticationSc
 
     };
 
-    options.Validate(scheme: CookieAuthenticationDefaults.AuthenticationScheme);
+    options.Validate(CookieAuthenticationDefaults.AuthenticationScheme);
 });
 
 
