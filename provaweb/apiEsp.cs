@@ -9,13 +9,11 @@ namespace provaweb
     {
         private readonly ILogger<apiEsp> m_logger;
         private readonly RegistroEsp m_registroEsp;
-        private readonly ContorolloEspOnline m_stateRelay;
 
-        public apiEsp(ILogger<apiEsp> logger, RegistroEsp registro, ContorolloEspOnline stateRelay)
+        public apiEsp(ILogger<apiEsp> logger, RegistroEsp registro)
         {
             m_logger = logger;
             m_registroEsp = registro;
-            m_stateRelay = stateRelay;
         }
 
         public record ESP(string nomeEsp, string mac);
@@ -47,10 +45,10 @@ namespace provaweb
         }
         [HttpGet("StatoRelay")]
         [Authorize]
-        public IActionResult StatoEsp()
+        public IActionResult StatoEsp([FromServices] ContorolloEspOnline contorolloEspOnline)
         {
 
-            var f =  m_stateRelay.Offline;
+            var f =  contorolloEspOnline.Offline;
             return Ok(f);
         }
     }
