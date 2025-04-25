@@ -63,6 +63,22 @@ useEffect(() => {
   fetchData();
   return ()=>{isActive=false;}  
 },[]);
+
+
+ useEffect(() => {
+    const Autenticazione = async () => {
+      let data = await fetch("/Login/Autenticazione", { method: "GET", headers: { 'Content-type': 'application/json; charl set=UTF-8' } });
+      if (data.status === 200) {
+        setToken(true); 
+      } else {
+        setToken(false);
+      }
+      setTimeout(()=>{
+        Autenticazione();
+      },1000)
+    };
+    Autenticazione();
+  },[]);
   return (
       <div>
           <HashRouter>
