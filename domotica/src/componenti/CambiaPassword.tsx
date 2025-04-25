@@ -67,7 +67,7 @@ export function CambiaPassword() {
                     <input type="Password" value={PasswordRib} className={"form-control is-" + (confronto === true ? "" : "invalid")} placeholder=" " id="Password3" onChange={(a) => { setPasswordRib(a.target.value);  setInvalid(true); }} onKeyDown={invio} />
                     <label form="Password">Conferma Password</label>
                 </div>
-                <button type="button" className={"Bouttont btn btn-" + (statobottone === true ? "success" : "primary")} onClick={Cambio}>Cambio</button>
+                <button type="button" className={"Bouttont btn btn-" + (statobottone === true ? "success" : "primary")} onClick={Cambio}>{statobottone === true ? "Cambiata" : "Cambia"}</button>
             </div>
 
     );
