@@ -1,6 +1,6 @@
 import  { useCallback,useEffect, useState } from "react";
 
-export function Signin(props: { setToken: (t: boolean) => any}) {
+export function Signin(props: { setToken: (t: boolean) => void}) {
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
   const [invalid, setInvalid] = useState(false);
