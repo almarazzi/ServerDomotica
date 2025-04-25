@@ -13,9 +13,7 @@ interface key{
 }
 export function Manuale(props:{mac:string}){  
 const [r, setr] = useState([] as Oragiorno[]);
-//const [pp, setpp] = useState("");
 
-//const a = new Date();
 useEffect(() => {
     let isactive= true;
     const fetchData1 = async () => {
@@ -25,8 +23,6 @@ useEffect(() => {
             if(u.key===props.mac)
             {
                 setr(u.value);
-                //setpp(u.value);
-                r.forEach(u=>console.log(u.oraFine));
             }
         })
         if(isactive)
