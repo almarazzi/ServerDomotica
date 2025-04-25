@@ -27,7 +27,7 @@ interface GetRuolo{
   readonly username: string;
 }
 function App() {
-  const [token, setToken] = useState(false);
+  const [token, setToken] = useState(false); 
   const [grado, setGrado] = useState("");
   const [lista, Setlista] = useState([] as key[]);
   useEffect(() => {
@@ -39,7 +39,6 @@ function App() {
         var res = await data.json() as GetRuolo;
         if(!isActive) return;
         setGrado(res.ruolo);
-        console.log(res.ruolo);
     };
     fetchData();
     return ()=>{isActive=false;}  //cleanup when component unmounts

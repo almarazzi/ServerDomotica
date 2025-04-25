@@ -8,7 +8,7 @@ interface GetRuolo{
     readonly ruolo: string;
 }
 
-export function Layout(props: { setToken: (t: boolean) => void }) {
+export function Layout(props: { setToken: (t:boolean)=>any}) {
  const [, Data] = useState("");
  const [grado, setGrado] = useState("");
  const [nomeUtente, setNomeUtente] = useState("");
@@ -16,8 +16,7 @@ export function Layout(props: { setToken: (t: boolean) => void }) {
  setTimeout(() => {
     Data(d.toString());
  }, 1000);
- //var lingua= moment.locale("it");
-let data =moment().format(' HH:mm, DD/MM/Y');
+let data =moment().format('HH:mm, DD/MM/Y');
 
 const Logout = useCallback(async () => {
     let tt= await fetch("/Login/Logout", { method: "GET"});
@@ -33,12 +32,11 @@ useEffect(() => {
     let isactive=true;
     const Autenticazione = async () => {
         let data = await fetch("/Login/Autenticazione", { method: "GET" , headers: {'Content-type': 'application/json; charl set=UTF-8'} });
-        //let res = await data.json();
         if(isactive)
         {
             if (data.status !== 200) {
                 props.setToken(false);
-                window.location.reload();
+                window.location.href="/";
             }
             setTimeout(()=>{
                 Autenticazione();
@@ -70,7 +68,7 @@ useEffect(() => {
     <Fragment>
         <nav className="navbar navbar-expand-lg navbar-dark bg-dark iii">
             <div className="container-fluid">
-                <div className="navbar-brand">Data {data}</div >
+                <div className="navbar-brand">{data}</div >
                 <div className="navbar-brand">Benvenuto {nomeUtente}</div>
                     <button className="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNavDarkDropdown" aria-controls="navbarNavDarkDropdown" aria-expanded="false" aria-label="Toggle navigation">
                     <span className="navbar-toggler-icon"></span>

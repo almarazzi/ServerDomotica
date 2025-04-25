@@ -436,5 +436,10 @@ text-align: -webkit-center;
 .manu{
   margin: 5px;
 }
-
+.Pb_login{
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  column-gap: inherit;
+}
 

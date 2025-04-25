@@ -1,41 +1,43 @@
 import  { useCallback,useEffect, useState } from "react";
 
-export function Signin(props: { setToken: (t: boolean) => void }) {
+export function Signin(props: { setToken: (t: boolean) => any}) {
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
   const [invalid, setInvalid] = useState(false);
-  
+  const [visibilita, setvisibilita] = useState(false);
   useEffect(() => {
     const Autenticazione = async () => {
-      let data = await fetch("/Login/Autenticazione", { method: "GET", headers: {'Content-type': 'application/json; charl set=UTF-8'}});
-      console.log(data.status);
-      if (data.status === 200)
-      {
-        props.setToken(true);
-      }else
-      {
+      let data = await fetch("/Login/Autenticazione", { method: "GET", headers: { 'Content-type': 'application/json; charl set=UTF-8' } });
+      if (data.status === 200) {
+        props.setToken(true); 
+        setvisibilita(false);
+      } else {
         props.setToken(false);
+        setvisibilita(false);
       }
     };
     Autenticazione();
-  }, [props.setToken]);
-  
+  }, [props]);
+
   const signIn = useCallback(async () => {
     let res = await fetch("/Login/cookie", { body: JSON.stringify({ username, password}), method: "POST", headers: {'Content-type': 'application/json; charl set=UTF-8'}});
     if (res.status === 200)
     {
       props.setToken(true);
      // setLoading(false);
+      setvisibilita(false);
     }else
     {
       props.setToken(false);
       setInvalid(true);
+      setvisibilita(false);
     }
-  }, [username, password, invalid,props.setToken]);
+  }, [username, password,props]);
 
   const invio = (event: { key: any; }) => {
     if (event.key === "Enter") {
       signIn();
+      setvisibilita(true);
     }
   }
 
@@ -52,7 +54,10 @@ export function Signin(props: { setToken: (t: boolean) => void }) {
           <label form="inputPassword">Password</label>
         </div>
 
-        <button type="button" className=" btn btn-success" onClick={signIn}>Login</button>
+      <button type="button" className="btn btn-success Pb_login" onClick={()=> {signIn(), setvisibilita(true)}}>
+        <span role="status"> Login </span>
+        {visibilita && <span className="spinner-border spinner-border-sm" aria-hidden="true"></span>}
+      </button>
         
         
       </div> 
