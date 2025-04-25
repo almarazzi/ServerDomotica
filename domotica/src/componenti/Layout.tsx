@@ -8,7 +8,7 @@ interface GetRuolo{
     readonly ruolo: string;
 }
 
-export function Layout(props: { setToken: (t:boolean)=>any}) {
+export function Layout(props: { setToken: (t:boolean)=>void}) {
  const [, Data] = useState("");
  const [grado, setGrado] = useState("");
  const [nomeUtente, setNomeUtente] = useState("");
