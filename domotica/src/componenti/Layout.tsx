@@ -27,27 +27,6 @@ const Logout = useCallback(async () => {
     }
     
 },[props]);
-
-useEffect(() => {
-    let isactive=true;
-    const Autenticazione = async () => {
-        let data = await fetch("/Login/Autenticazione", { method: "GET" , headers: {'Content-type': 'application/json; charl set=UTF-8'} });
-        if(isactive)
-        {
-            if (data.status !== 200) {
-                props.setToken(false);
-                window.location.href="/";
-            }
-            setTimeout(()=>{
-                Autenticazione();
-            },5000);
-        }
-    };
-    Autenticazione();
-    return()=>{isactive=false;};
-}, [props]);
-
-
 useEffect(() => {
     let isActive = true;
     const fetchData = async () => {
