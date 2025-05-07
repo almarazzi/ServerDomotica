@@ -153,11 +153,11 @@ export function ComponenteEsp(props: { mac: string, ip: string, abilitazioe: boo
             <div className="componenteAutoManu">
                 <input className="form-check-input casellaAuto" type="checkbox" checked={A} onChange={p1} id="invalidCheck1" required />
 
-                <Link to={"/Manuale/" + props.mac} className="bottoneAuto dropdown-item">
+                <Link to={"/Automatico/" + props.mac} className="bottoneAuto dropdown-item">
                     <button type="button" className="btn btn-outline-primary ">Automatico</button>
                 </Link>
 
-                <Link to={"/Automatico/" + props.mac} className="bottoneManu dropdown-item">
+                <Link to={"/Manuale/" + props.mac} className="bottoneManu dropdown-item">
                     <button type="button" className="btn btn-outline-primary ">Manuale</button>
                 </Link>
 

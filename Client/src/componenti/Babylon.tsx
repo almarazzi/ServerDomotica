@@ -12,7 +12,7 @@ import { StandardMaterial } from "@babylonjs/core/Materials/standardMaterial";
 import { CreateCylinder } from "@babylonjs/core/Meshes/Builders/cylinderBuilder";
 
 //import {Inspector} from  '@babylonjs/inspector';  //inspector indeciso se lasciarlo o no 
-import Automatico from "./Automatico";
+import { Automatico } from "./Automatico";
 import { Manuale } from "./Manuale";
 interface Lista {
   readonly nomeEspClient: string;
@@ -287,7 +287,7 @@ export function Babylon(props: { mac: Array<key> }) {
               <input className="form-check-input" type="checkbox" checked={M} onChange={m1} id="invalidCheck1" required />
               <label form="abiliatazione"> Abilitazione Manuale </label>
             </div>
-            <Automatico key={key} mac={mac} />
+            <Manuale key={key} mac={mac} />
             <hr />
             <div>
               <input className="form-check-input" type="checkbox" checked={Auto} onChange={a1} id="invalidCheck1" required />
@@ -295,7 +295,7 @@ export function Babylon(props: { mac: Array<key> }) {
             </div>
           </div>
           <div className="manu">
-            <Manuale key={key + 1} mac={mac} />
+            <Automatico key={key + 1} mac={mac} />
           </div>
         </div>
       )}

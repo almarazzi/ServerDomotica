@@ -8,7 +8,7 @@ interface Oragiorno{
 }
 
 export const regex = new RegExp("^((2[0-3]|[01]?[0-9]):([0-5]?[0-9]):([0-5]?[0-9]))$"); //,(([0-9][0-9][0-9][0-9])-(0[0-9]|1[0-2])-(0?[1-9]|[12][0-9]|3[0-2]))
-export function DayManuale(props: {dayOfWeek: number,array: Array<Oragiorno>, mac: string}) {
+export function DayAutomatico(props: {dayOfWeek: number,array: Array<Oragiorno>, mac: string}) {
   const [dataInz,SetdataInz] = useState("");
   const [dataFin,SetdataFin] = useState("");
   const [oraFin,SetoraFin] = useState("");
