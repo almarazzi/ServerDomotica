@@ -305,7 +305,7 @@ namespace provaweb
                 return (key, true);
 
             }
-            catch (TaskCanceledException ex)
+            catch (Exception ex)
             {
                 logger.LogWarning(ex.Message);
             }
