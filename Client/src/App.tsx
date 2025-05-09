@@ -28,6 +28,7 @@ interface GetRuolo{
 }
 function App() {
   const [token, setToken] = useState(false); 
+  const [ppp, setPpp] = useState(false); 
   const [grado, setGrado] = useState("");
   const [lista, Setlista] = useState([] as key[]);
   useEffect(() => {
@@ -84,11 +85,11 @@ useEffect(() => {
           <HashRouter>
               <Routes>
                 <Route path="/Babylon" element={(grado==="Admin" || grado==="Basic"?<Babylon  mac={lista}/>: null)} />
-                  <Route path="/" element={ (token === true ? <Layout setToken={setToken}/> : <Signin  setToken={setToken} />)}>
+                  <Route path="/" element={ (token === true ? <Layout setToken={setToken} p={ppp}/> : <Signin  setToken={setToken} />)}>
                   <Route path="/CambiaPassword"  element={(grado==="Admin" || grado==="Basic"?<CambiaPassword/>:null)} />    
                   <Route path="/ESP" element={(grado==="Admin" || grado==="Basic"?<Esp/>:null)} />
                   <Route path="/NuovoAccount" element={(grado==="Admin" || grado==="root"?<NuovoAccount /> :null)} />
-                  <Route path="/ControlloUtenti" element={(grado==="Admin"?<ControlloUtenti />:null)} /> 
+                  <Route path="/ControlloUtenti" element={(grado==="Admin" && ppp ===false?<ControlloUtenti setSizeG={setPpp}  />:null)} /> 
                   {lista.map((u,i)=>
                   <Route path={"/Automatico/"+u.key} element={(grado==="Admin" || grado==="Basic"?<Automatico key={i} mac={u.key}/>:null)} />
                   )}
