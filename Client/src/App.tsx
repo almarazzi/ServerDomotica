@@ -1,106 +1,121 @@
 import './App.css';
-import { Routes, Route,  HashRouter } from 'react-router-dom';
-import { Layout } from './componenti/Layout'; 
+import { Routes, Route, HashRouter } from 'react-router-dom';
+import { Layout } from './componenti/Layout';
 import { Automatico } from './componenti/Automatico';
-import { Manuale } from './componenti/Manuale'; 
+import { Manuale } from './componenti/Manuale';
 import { Signin } from './componenti/Signin';
 import { useEffect, useState } from 'react';
 import { CambiaPassword } from './componenti/CambiaPassword';
 import { NuovoAccount } from './componenti/NuovoAccount';
 import { ControlloUtenti } from './componenti/ControlloUtenti';
 import { Esp } from './componenti/Esp';
-import {Babylon} from './componenti/Babylon';
+import { Babylon } from './componenti/Babylon';
 
 
-interface Lista{
+interface Lista {
   readonly nomeEspClient: string;
-  readonly ipEsp : string;
-  readonly abilitazione:boolean;
+  readonly ipEsp: string;
+  readonly abilitazione: boolean;
 }
-interface key{
+interface key {
   key: string;
-  value:Lista;
+  value: Lista;
 }
 
-interface GetRuolo{
+interface GetRuolo {
   readonly ruolo: string;
   readonly username: string;
 }
 function App() {
-  const [token, setToken] = useState(false); 
-  const [ppp, setPpp] = useState(false); 
+  const [token, setToken] = useState(false);
+  const [SizeG, setSizeG] = useState(false);
   const [grado, setGrado] = useState("");
   const [lista, Setlista] = useState([] as key[]);
   useEffect(() => {
     let isActive = true;
     const fetchData = async () => {
-        
-        let data = await fetch("/Login/GetRuolo" , {method: 'GET'});
-        if(!isActive) return;
-        var res = await data.json() as GetRuolo;
-        if(!isActive) return;
-        setGrado(res.ruolo);
+
+      let data = await fetch("/Login/GetRuolo", { method: 'GET' });
+      if (!isActive) return;
+      var res = await data.json() as GetRuolo;
+      if (!isActive) return;
+      setGrado(res.ruolo);
     };
     fetchData();
-    return ()=>{isActive=false;}  //cleanup when component unmounts
-},[token]);
+    return () => { isActive = false; }  //cleanup when component unmounts
+  }, [token]);
 
-useEffect(() => {        
-  let isActive = true;
-  const fetchData = async () => {            
-      let data = await fetch("/apiEsp/ListaEsp" , {method: 'GET'});
-      if(!isActive) return;
+  useEffect(() => {
+    let isActive = true;
+    const fetchData = async () => {
+      let data = await fetch("/apiEsp/ListaEsp", { method: 'GET' });
+      if (!isActive) return;
       var res = await data.json() as key[];
-      if(!isActive) return;
+      if (!isActive) return;
       Setlista(res);
-      
-      if(isActive===true) 
-      {
-        setTimeout(()=>{
+
+      if (isActive === true) {
+        setTimeout(() => {
           fetchData();
-        },500);
+        }, 500);
       }
-  };
-  fetchData();
-  return ()=>{isActive=false;}  
-},[]);
+    };
+    fetchData();
+    return () => { isActive = false; }
+  }, []);
 
 
- useEffect(() => {
+  useEffect(() => {
     const Autenticazione = async () => {
       let data = await fetch("/Login/Autenticazione", { method: "GET", headers: { 'Content-type': 'application/json; charl set=UTF-8' } });
       if (data.status === 200) {
-        setToken(true); 
+        setToken(true);
       } else {
         setToken(false);
       }
-      setTimeout(()=>{
+      setTimeout(() => {
         Autenticazione();
-      },1000)
+      }, 1000)
     };
     Autenticazione();
-  },[]);
-  return (
-      <div>
-          <HashRouter>
-              <Routes>
-                <Route path="/Babylon" element={(grado==="Admin" || grado==="Basic"?<Babylon  mac={lista}/>: null)} />
-                  <Route path="/" element={ (token === true ? <Layout setToken={setToken} p={ppp}/> : <Signin  setToken={setToken} />)}>
-                  <Route path="/CambiaPassword"  element={(grado==="Admin" || grado==="Basic"?<CambiaPassword/>:null)} />    
-                  <Route path="/ESP" element={(grado==="Admin" || grado==="Basic"?<Esp/>:null)} />
-                  <Route path="/NuovoAccount" element={(grado==="Admin" || grado==="root"?<NuovoAccount /> :null)} />
-                  <Route path="/ControlloUtenti" element={(grado==="Admin" && ppp ===false?<ControlloUtenti setSizeG={setPpp}  />:null)} /> 
-                  {lista.map((u,i)=>
-                  <Route path={"/Automatico/"+u.key} element={(grado==="Admin" || grado==="Basic"?<Automatico key={i} mac={u.key}/>:null)} />
-                  )}
-                  {lista.map((u,i)=>
-                  <Route path={"/Manuale/"+u.key} element={(grado==="Admin" || grado==="Basic"?<Manuale key={i} mac={u.key} />:null)} />
-                  )}
+  }, []);
 
-                </Route>
-              </Routes >
-            </HashRouter>    
-      </div> 
+  useEffect(() => {
+    const larghezza = () => {
+      if (window.innerWidth <= 1000) {
+        setSizeG(true);
+      } else {
+        setSizeG(false);
+      }
+      setTimeout(() => {
+        larghezza();
+      }, 1000);
+    }
+    larghezza();
+  }, [])
+
+
+  return (
+    <div>
+      <HashRouter>
+        <Routes>
+          <Route path="/Babylon" element={(grado === "Admin" || grado === "Basic" ? <Babylon mac={lista} /> : null)} />
+          <Route path="/" element={(token === true ? <Layout setToken={setToken} p={SizeG} /> : <Signin setToken={setToken} />)}>
+            <Route path="/CambiaPassword" element={(grado === "Admin" || grado === "Basic" ? <CambiaPassword /> : null)} />
+            <Route path="/ESP" element={(grado === "Admin" || grado === "Basic" ? <Esp /> : null)} />
+            <Route path="/NuovoAccount" element={(grado === "Admin" || grado === "root" ? <NuovoAccount /> : null)} />
+            <Route path="/ControlloUtenti" element={(grado === "Admin" && SizeG === false ? <ControlloUtenti /> : null)} />
+            {lista.map((u, i) =>
+              <Route path={"/Automatico/" + u.key} element={(grado === "Admin" || grado === "Basic" ? <Automatico key={i} mac={u.key} /> : null)} />
+            )}
+            {lista.map((u, i) =>
+              <Route path={"/Manuale/" + u.key} element={(grado === "Admin" || grado === "Basic" ? <Manuale key={i} mac={u.key} /> : null)} />
+            )}
+
+          </Route>
+        </Routes >
+      </HashRouter>
+    </div>
   );
 }
 export default App;
