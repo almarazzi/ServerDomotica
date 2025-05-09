@@ -1,4 +1,7 @@
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
+import OfflineNonAbilitato from "./OfflineNonAbilitato.png";
+import OfflineAblitato from './OfflineAbilitato.png';
+import OnlineAblitato from "./OnlineAbilitato.png";
 
 
 interface User{
@@ -10,9 +13,25 @@ interface User{
 
 
 
-export function ControlloUtenti() {
+export function ControlloUtenti(props:{setSizeG: (t:boolean)=>void}) {
     const [users, setUsers] = useState([] as User[]);
-    
+    const [Abilitazione, setAbilitazione] = useState<{[Nomeu:string]:boolean}>({});
+    const [Immagine, setImmagine] = useState<{[Nomeu:string]:string}>({});
+    useEffect(()=>{
+        const larghezza = ()=>{
+        if(window.innerWidth<=1000)
+        {
+            props.setSizeG(true);
+        }else
+        {
+            props.setSizeG(false);
+        }
+        setTimeout(()=>{
+            larghezza();
+        },1000);
+    }
+    larghezza();
+    },[])
     useEffect(() => {        
         let isActive = true;
         const fetchData = async () => {            
@@ -21,12 +40,55 @@ export function ControlloUtenti() {
             var res = await data.json() as User[];
             if(!isActive) return;
             setUsers(res);
-            if(isActive===true) setTimeout(()=>{fetchData();},500);
+            if(isActive===true) 
+            {
+                setTimeout(()=>{
+                    fetchData();
+                },500);
+            }
         };
         fetchData();
         return ()=>{isActive=false;}  //cleanup when component unmounts
     },[]);
 
+
+    const p1 = useCallback(async (nomeU: string) => {
+        const inv = { Username: nomeU, StatoAccount: !Abilitazione[nomeU] };
+        await fetch("/Login/StatoAccount", { body: JSON.stringify(inv), method: "PUT", headers: { 'Content-type': 'application/json; charl set=UTF-8' } });
+
+    }, [Abilitazione]);
+
+    useEffect(() => {
+        users.map((u, _) => {
+            setAbilitazione(StatoAttuale => ({
+                ...StatoAttuale,
+                [u.userName]: u.statoAccount
+            }));
+        });
+    },[users]);
+
+    useEffect(() => {
+        users.map((u, _) => {
+            if (u.isOnline === true && u.statoAccount === true) {
+                setImmagine(StatoAttuale => ({
+                    ...StatoAttuale,
+                    [u.userName]: OnlineAblitato
+                }));
+            }
+            if (u.isOnline === false && u.statoAccount === true) {
+                setImmagine(StatoAttuale => ({
+                    ...StatoAttuale,
+                    [u.userName]: OfflineAblitato
+                }));
+            }
+            if (u.isOnline === false && u.statoAccount === false) {
+                setImmagine(StatoAttuale => ({
+                    ...StatoAttuale,
+                    [u.userName]: OfflineNonAbilitato
+                }));
+            }
+        });
+    }, [users]);
 
     return (        
         <div className="prova">
@@ -37,9 +99,7 @@ export function ControlloUtenti() {
                         <th className="tabella">NomeUtente</th>
                         <th className="tabella">Ruolo</th>
                         <th className="tabella">Sospendi L'account</th>
-                        <th className="tabella">Riabilita L'account</th>
-                        <th className="tabella">Stato</th>
-                        <th className="tabella">Online</th>
+                        <th className="tabella">Online/Stato</th>
                     </tr>  
                 </thead>          
                 <tbody>
@@ -48,18 +108,10 @@ export function ControlloUtenti() {
                             <td className="tabella">{i}</td>
                             <td className="tabella">{u.userName}</td>
                             <td className="tabella">{u.role}</td>
-                            <td className="prova2">
-                                <button type="button" className={"Button btn btn-primary"} onClick={async()=>{const inv={Username: u.userName, StatoAccount: false};
-                                await fetch("/Login/StatoAccount", { body: JSON.stringify(inv), method: "PUT", headers: { 'Content-type': 'application/json; charl set=UTF-8' }});
-                                }}>Schiaccia qui</button>
+                            <td className="tabella">
+                                <input className="form-check-input" type="checkbox" checked={!Abilitazione[u.userName]} onChange={()=>p1(u.userName)} id="invalidCheck1" required /> 
                             </td>
-                            <td className="prova2">
-                                <button type="button" className="btn btn-primary Button" onClick={async()=>{const inv={Username: u.userName, StatoAccount: true};
-                                await fetch("/Login/StatoAccount", { body: JSON.stringify(inv), method: "PUT", headers: { 'Content-type': 'application/json; charl set=UTF-8' }});
-                                }}>Schiaccia qui</button>
-                            </td>
-                            <td className="tabella">{u.statoAccount ? "Abbilitato": "Sospeso"}</td>
-                            <td className={"tabella"}> <div className={u.isOnline ? "isOnline": "isOffline"}></div></td>
+                            <td className={"tabella"}> <img src={Immagine[u.userName]} className="ridotto"></img></td>
                         </tr>
                     )}
                 </tbody>
