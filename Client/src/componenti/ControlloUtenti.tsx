@@ -13,25 +13,10 @@ interface User{
 
 
 
-export function ControlloUtenti(props:{setSizeG: (t:boolean)=>void}) {
+export function ControlloUtenti() {
     const [users, setUsers] = useState([] as User[]);
     const [Abilitazione, setAbilitazione] = useState<{[Nomeu:string]:boolean}>({});
     const [Immagine, setImmagine] = useState<{[Nomeu:string]:string}>({});
-    useEffect(()=>{
-        const larghezza = ()=>{
-        if(window.innerWidth<=1000)
-        {
-            props.setSizeG(true);
-        }else
-        {
-            props.setSizeG(false);
-        }
-        setTimeout(()=>{
-            larghezza();
-        },1000);
-    }
-    larghezza();
-    },[])
     useEffect(() => {        
         let isActive = true;
         const fetchData = async () => {            
