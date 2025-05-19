@@ -43,7 +43,7 @@ export function ComponenteEsp(props: { mac: string, ip: string, abilitazioe: boo
     useEffect(() => {
         let isactive = true;
         const fetchData = async () => {
-            let data = await fetch("/api/RelaySwitch/GetProgrammManu", { method: 'GET', headers: { 'Content-type': 'application/json; charl set=UTF-8' } });
+            let data = await fetch("/api/RelaySwitch/GetProgrammManu", { method: 'GET'});
             var res = await data.json() as Tutto[];
             if (isactive) {
                 {
@@ -73,7 +73,7 @@ export function ComponenteEsp(props: { mac: string, ip: string, abilitazioe: boo
     useEffect(() => {
         let isactive = true;
         const fetchData1 = async () => {
-            let data = await fetch("/api/RelaySwitch/GetProgrammAuto", { method: 'GET', headers: { 'Content-type': 'application/json; charl set=UTF-8' } });
+            let data = await fetch("/api/RelaySwitch/GetProgrammAuto", { method: 'GET'});
             let res = await data.json() as Tutto[];
             if (isactive) {
                 {
@@ -97,7 +97,7 @@ export function ComponenteEsp(props: { mac: string, ip: string, abilitazioe: boo
     useEffect(() => {
         let isactive = true;
         const fetchData = async () => {
-            let data = await fetch("/apiEsp/StatoRelay", { method: 'GET', headers: { 'Content-type': 'application/json; charl set=UTF-8' } });
+            let data = await fetch("/apiEsp/StatoRelay", { method: 'GET'});
             var res = await data.json() as [];
             if (isactive) {
                 {
@@ -116,7 +116,6 @@ export function ComponenteEsp(props: { mac: string, ip: string, abilitazioe: boo
                 }
                 setTimeout(() => {
                     fetchData();
-
                 }, 500);
             }
         };
@@ -167,3 +166,4 @@ export function ComponenteEsp(props: { mac: string, ip: string, abilitazioe: boo
 
     );
 }
+export default ComponenteEsp;

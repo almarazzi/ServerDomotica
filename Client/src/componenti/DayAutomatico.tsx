@@ -189,4 +189,4 @@ useEffect(()=>{
     );
   
 }
-//          {d.getDay()===props.dayOfWeek ? <MeteoManu/> : null}
+export default DayAutomatico;

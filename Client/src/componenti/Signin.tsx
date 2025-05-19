@@ -52,3 +52,4 @@ export function Signin(props: { setToken: (t: boolean) => void}) {
 
 }
 
+export default Signin;

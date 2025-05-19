@@ -12,7 +12,7 @@ export function Manuale(props:{mac:string}){
 
         const fetchData = async () => {
           
-          let data = await fetch("/api/RelaySwitch/GetState" , {method: 'GET',headers: { 'Content-type': 'application/json; charl set=UTF-8' }});    
+          let data = await fetch("/api/RelaySwitch/GetState" , {method: 'GET'});    
           var res = await data.json() as Tutto[];
         
           if(isactive)
@@ -49,5 +49,6 @@ export function Manuale(props:{mac:string}){
       </Fragment>
     );
 }   
+
 
 export default Manuale;

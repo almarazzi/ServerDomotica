@@ -8,7 +8,7 @@ interface GetRuolo{
     readonly ruolo: string;
 }
 
-export function Layout(props: { setToken: (t:boolean)=>void; p:boolean}) {
+export function Layout(props: { setToken: (t:boolean)=>void; p:boolean; Grade:GetRuolo}) {
  const [, Data] = useState("");
  const [grado, setGrado] = useState("");
  const [nomeUtente, setNomeUtente] = useState("");
@@ -28,19 +28,9 @@ const Logout = useCallback(async () => {
     
 },[props]);
 useEffect(() => {
-    let isActive = true;
-    const fetchData = async () => {
-        
-        let data = await fetch("/Login/GetRuolo" , {method: 'GET'});
-        if(!isActive) return;
-        var res = await data.json() as GetRuolo;
-        if(!isActive) return;
-        setGrado(res.ruolo);
-        setNomeUtente(res.username);
-    };
-    fetchData();
-    return ()=>{isActive=false;}  //cleanup when component unmounts
-},[grado]);
+    setGrado(props.Grade.ruolo);
+    setNomeUtente(props.Grade.username);
+},[props.Grade]);
 
 
     return (
@@ -75,3 +65,4 @@ useEffect(() => {
     </Fragment>
     );
 }
+export default Layout;

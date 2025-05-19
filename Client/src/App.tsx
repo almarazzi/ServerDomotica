@@ -1,15 +1,15 @@
 import './App.css';
 import { Routes, Route, HashRouter } from 'react-router-dom';
-import { Layout } from './componenti/Layout';
-import { Automatico } from './componenti/Automatico';
-import { Manuale } from './componenti/Manuale';
-import { Signin } from './componenti/Signin';
 import { useEffect, useState } from 'react';
-import { CambiaPassword } from './componenti/CambiaPassword';
-import { NuovoAccount } from './componenti/NuovoAccount';
-import { ControlloUtenti } from './componenti/ControlloUtenti';
-import { Esp } from './componenti/Esp';
-import { Babylon } from './componenti/Babylon';
+import  Layout  from './componenti/Layout';
+import  Automatico  from './componenti/Automatico';
+import  Manuale  from './componenti/Manuale';
+import  Signin  from './componenti/Signin';
+import  CambiaPassword  from './componenti/CambiaPassword';
+import  NuovoAccount  from './componenti/NuovoAccount';
+import  ControlloUtenti  from './componenti/ControlloUtenti';
+import  Esp  from './componenti/Esp';
+import  Babylon  from './componenti/Babylon';
 
 
 interface Lista {
@@ -30,20 +30,24 @@ function App() {
   const [token, setToken] = useState(false);
   const [SizeG, setSizeG] = useState(false);
   const [grado, setGrado] = useState("");
+  const [Getgrado, setGetGrado] = useState<GetRuolo>({} as GetRuolo);
   const [lista, Setlista] = useState([] as key[]);
   useEffect(() => {
     let isActive = true;
     const fetchData = async () => {
-
       let data = await fetch("/Login/GetRuolo", { method: 'GET' });
       if (!isActive) return;
       var res = await data.json() as GetRuolo;
       if (!isActive) return;
-      setGrado(res.ruolo);
+      setGetGrado(res);
     };
     fetchData();
-    return () => { isActive = false; }  //cleanup when component unmounts
+    return () => { isActive = false; }  
   }, [token]);
+
+  useEffect(()=>{
+    setGrado(Getgrado.ruolo);
+  },[Getgrado]);
 
   useEffect(() => {
     let isActive = true;
@@ -67,7 +71,7 @@ function App() {
 
   useEffect(() => {
     const Autenticazione = async () => {
-      let data = await fetch("/Login/Autenticazione", { method: "GET", headers: { 'Content-type': 'application/json; charl set=UTF-8' } });
+      let data = await fetch("/Login/Autenticazione", { method: "GET"});
       if (data.status === 200) {
         setToken(true);
       } else {
@@ -100,9 +104,9 @@ function App() {
       <HashRouter>
         <Routes>
           <Route path="/Babylon" element={(grado === "Admin" || grado === "Basic" ? <Babylon mac={lista} /> : null)} />
-          <Route path="/" element={(token === true ? <Layout setToken={setToken} p={SizeG} /> : <Signin setToken={setToken} />)}>
+          <Route path="/" element={(token === true ? <Layout setToken={setToken} p={SizeG} Grade={Getgrado} /> : <Signin setToken={setToken} />)}>
             <Route path="/CambiaPassword" element={(grado === "Admin" || grado === "Basic" ? <CambiaPassword /> : null)} />
-            <Route path="/ESP" element={(grado === "Admin" || grado === "Basic" ? <Esp /> : null)} />
+            <Route path="/ESP" element={(grado === "Admin" || grado === "Basic" ? <Esp lista={lista}/> : null)} />
             <Route path="/NuovoAccount" element={(grado === "Admin" || grado === "root" ? <NuovoAccount /> : null)} />
             <Route path="/ControlloUtenti" element={(grado === "Admin" && SizeG === false ? <ControlloUtenti /> : null)} />
             {lista.map((u, i) =>
@@ -111,7 +115,6 @@ function App() {
             {lista.map((u, i) =>
               <Route path={"/Manuale/" + u.key} element={(grado === "Admin" || grado === "Basic" ? <Manuale key={i} mac={u.key} /> : null)} />
             )}
-
           </Route>
         </Routes >
       </HashRouter>

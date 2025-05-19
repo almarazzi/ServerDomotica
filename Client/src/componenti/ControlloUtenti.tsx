@@ -104,3 +104,4 @@ export function ControlloUtenti() {
         </div>
     );
 }
+export default ControlloUtenti;

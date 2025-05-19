@@ -12,8 +12,8 @@ import { StandardMaterial } from "@babylonjs/core/Materials/standardMaterial";
 import { CreateCylinder } from "@babylonjs/core/Meshes/Builders/cylinderBuilder";
 
 //import {Inspector} from  '@babylonjs/inspector';  //inspector indeciso se lasciarlo o no 
-import { Automatico } from "./Automatico";
-import { Manuale } from "./Manuale";
+import  Automatico  from "./Automatico";
+import  Manuale  from "./Manuale";
 interface Lista {
   readonly nomeEspClient: string;
   readonly ipEsp: string;
@@ -249,7 +249,7 @@ export function Babylon(props: { mac: Array<key> }) {
   useEffect(() => {
     let isactive = true;
     const fetchData1 = async () => {
-      let data = await fetch("/api/RelaySwitch/GetProgrammAuto", { method: 'GET', headers: { 'Content-type': 'application/json; charl set=UTF-8' } });
+      let data = await fetch("/api/RelaySwitch/GetProgrammAuto", { method: 'GET'});
       let res = await data.json() as Tutto[];
       if (isactive) {
         {
@@ -304,7 +304,7 @@ export function Babylon(props: { mac: Array<key> }) {
     </div>
   );
 }
-
+export default Babylon;
 
 
 

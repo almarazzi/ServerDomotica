@@ -72,3 +72,4 @@ export function CambiaPassword() {
 
     );
 }
+export default CambiaPassword;

@@ -1,5 +1,5 @@
 import { Fragment, useEffect, useState,  } from "react";
-import { DayAutomatico } from "./DayAutomatico";
+import  DayAutomatico from "./DayAutomatico";
 
 
 interface Oragiorno{
@@ -17,7 +17,7 @@ const [r, setr] = useState([] as Oragiorno[]);
 useEffect(() => {
     let isactive= true;
     const fetchData1 = async () => {
-        let data = await fetch("/api/RelaySwitch/GetWeekProgram" ,{method:'GET',headers: { 'Content-type': 'application/json; charl set=UTF-8' }});    
+        let data = await fetch("/api/RelaySwitch/GetWeekProgram" ,{method:'GET'});    
         var res = await data.json() as key[];
         res.map((u,_)=>{
             if(u.key===props.mac)
@@ -47,3 +47,4 @@ useEffect(() => {
             )}
     </Fragment>    
 }
+export default Automatico;
