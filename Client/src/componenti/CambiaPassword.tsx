@@ -11,20 +11,19 @@ export function CambiaPassword() {
     const [statobottone, setStatobottone] = useState(false);
 
     useEffect(() => {
-        if(invalid===true)
-        {
-            setTimeout(() =>{
-                if(PasswordNuv!==null)
+        if (invalid === true) {
+            setTimeout(() => {
+                if (PasswordNuv !== null)
                     if (PasswordRib === PasswordNuv) {
                         setConfronto(true);
                         setPp(true);
                     }
-                    if (PasswordRib !== PasswordNuv) {
-                        setConfronto(false);
-                    } 
-            },500);
+                if (PasswordRib !== PasswordNuv) {
+                    setConfronto(false);
+                }
+            }, 500);
         }
-    }, [PasswordNuv, PasswordRib,invalid]);
+    }, [PasswordNuv, PasswordRib, invalid]);
 
     const Cambio = useCallback(async () => {
 
@@ -37,7 +36,7 @@ export function CambiaPassword() {
             }
         }
 
-    }, [pp, Username, PasswordAtt,PasswordNuv]);
+    }, [pp, Username, PasswordAtt, PasswordNuv]);
 
     const invio = (event: { key: any; }) => {
         if (event.key === "Enter") {
@@ -46,29 +45,29 @@ export function CambiaPassword() {
     }
 
     return (
-            <div className="CP">
-                <div className="titolo1 fw-bolder"> CambiaPassword </div>
-                <div className=" form-floating is-invalid md-3 UserNamet">
-                    <input type="text" value={Username} className={"form-control"} placeholder=" " id="inputEmail3" onChange={(a) => { setUsername(a.target.value); }} />
-                    <label form="inputEmail3">UserName</label>
-                </div>
-
-                <div className=" form-floating is-invalid is-valid md-3 Passwordt">
-                    <input type="Password" value={PasswordAtt} className={"form-control"} placeholder=" " id="Password1" onChange={(a) => { setPasswordAtt(a.target.value); }} />
-                    <label form="Password">Password attuale</label>
-                </div>
-
-                <div className=" form-floating is-invalid is-valid md-3 Passwordt">
-                    <input type="Password" value={PasswordNuv} className={"form-control"} placeholder=" " id="Password2" onChange={(a) => { setPasswordNuv(a.target.value); }} />
-                    <label form="Password">Password Nuova</label>
-                </div>
-
-                <div className=" form-floating is-invalid is-valid md-3 Passwordt">
-                    <input type="Password" value={PasswordRib} className={"form-control is-" + (confronto === true ? "" : "invalid")} placeholder=" " id="Password3" onChange={(a) => { setPasswordRib(a.target.value);  setInvalid(true); }} onKeyDown={invio} />
-                    <label form="Password">Conferma Password</label>
-                </div>
-                <button type="button" className={"Bouttont btn btn-" + (statobottone === true ? "success" : "primary")} onClick={Cambio}>{statobottone === true ? "Cambiata" : "Cambia"}</button>
+        <div className="CP">
+            <div className="titolo1 fw-bolder"> CambiaPassword </div>
+            <div className=" form-floating is-invalid md-3 UserNamet">
+                <input type="text" value={Username} className={"form-control"} placeholder=" " id="inputEmail3" onChange={(a) => { setUsername(a.target.value); }} />
+                <label form="inputEmail3">UserName</label>
             </div>
+
+            <div className=" form-floating is-invalid is-valid md-3 Passwordt">
+                <input type="Password" value={PasswordAtt} className={"form-control"} placeholder=" " id="Password1" onChange={(a) => { setPasswordAtt(a.target.value); }} />
+                <label form="Password">Password attuale</label>
+            </div>
+
+            <div className=" form-floating is-invalid is-valid md-3 Passwordt">
+                <input type="Password" value={PasswordNuv} className={"form-control"} placeholder=" " id="Password2" onChange={(a) => { setPasswordNuv(a.target.value); }} />
+                <label form="Password">Password Nuova</label>
+            </div>
+
+            <div className=" form-floating is-invalid is-valid md-3 Passwordt">
+                <input type="Password" value={PasswordRib} className={"form-control is-" + (confronto === true ? "" : "invalid")} placeholder=" " id="Password3" onChange={(a) => { setPasswordRib(a.target.value); setInvalid(true); }} onKeyDown={invio} />
+                <label form="Password">Conferma Password</label>
+            </div>
+            <button type="button" className={"Bouttont btn btn-" + (statobottone === true ? "success" : "primary")} onClick={Cambio}>{statobottone === true ? "Cambiata" : "Cambia"}</button>
+        </div>
 
     );
 }

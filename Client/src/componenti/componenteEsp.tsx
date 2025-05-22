@@ -1,4 +1,4 @@
-import {  useCallback, useEffect, useState} from "react";
+import { useCallback, useEffect, useState } from "react";
 import { DebounceInput } from "react-debounce-input";
 import { Link } from "react-router-dom";
 
@@ -43,7 +43,7 @@ export function ComponenteEsp(props: { mac: string, ip: string, abilitazioe: boo
     useEffect(() => {
         let isactive = true;
         const fetchData = async () => {
-            let data = await fetch("/api/RelaySwitch/GetProgrammManu", { method: 'GET'});
+            let data = await fetch("/api/RelaySwitch/GetProgrammManu", { method: 'GET' });
             var res = await data.json() as Tutto[];
             if (isactive) {
                 {
@@ -73,7 +73,7 @@ export function ComponenteEsp(props: { mac: string, ip: string, abilitazioe: boo
     useEffect(() => {
         let isactive = true;
         const fetchData1 = async () => {
-            let data = await fetch("/api/RelaySwitch/GetProgrammAuto", { method: 'GET'});
+            let data = await fetch("/api/RelaySwitch/GetProgrammAuto", { method: 'GET' });
             let res = await data.json() as Tutto[];
             if (isactive) {
                 {
@@ -97,21 +97,19 @@ export function ComponenteEsp(props: { mac: string, ip: string, abilitazioe: boo
     useEffect(() => {
         let isactive = true;
         const fetchData = async () => {
-            let data = await fetch("/apiEsp/StatoRelay", { method: 'GET'});
+            let data = await fetch("/apiEsp/StatoRelay", { method: 'GET' });
             var res = await data.json() as [];
             if (isactive) {
                 {
                     res.map((u, _) => {
                         if (u === props.mac) {
                             setIsoffline(true);
-                        }else
-                        {
+                        } else {
                             setIsoffline(false);
                         }
                     })
-                    if (res.length === 0)
-                    {
-                    setIsoffline(false);
+                    if (res.length === 0) {
+                        setIsoffline(false);
                     }
                 }
                 setTimeout(() => {

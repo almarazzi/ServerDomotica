@@ -1,25 +1,25 @@
-import { Fragment} from "react";
-import  ComponenteEsp  from "./componenteEsp";
+import { Fragment } from "react";
+import ComponenteEsp from "./componenteEsp";
 
-interface Lista{
+interface Lista {
     readonly nomeEspClient: string;
-    readonly ipEsp : string;
-    readonly abilitazione:boolean;
+    readonly ipEsp: string;
+    readonly abilitazione: boolean;
 }
-interface key{
+interface key {
     key: string;
-    value:Lista;
+    value: Lista;
 }
-export function Esp(props:{lista:key[]}){
+export function Esp(props: { lista: key[] }) {
 
 
-    return<Fragment>
-        {props.lista.map((u,i) =>
-            <ComponenteEsp key={i} abilitazioe={u.value.abilitazione} ip={u.value.ipEsp} mac={u.key} nome={u.value.nomeEspClient}/>
+    return <Fragment>
+        {props.lista.map((u, i) =>
+            <ComponenteEsp key={i} abilitazioe={u.value.abilitazione} ip={u.value.ipEsp} mac={u.key} nome={u.value.nomeEspClient} />
         )}
-        
+
     </Fragment>
-    
+
 }
 
 export default Esp;

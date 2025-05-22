@@ -4,7 +4,7 @@ import OfflineAblitato from './OfflineAbilitato.png';
 import OnlineAblitato from "./OnlineAbilitato.png";
 
 
-interface User{
+interface User {
     readonly userName: string;
     readonly role: string;
     readonly isOnline: boolean;
@@ -15,26 +15,25 @@ interface User{
 
 export function ControlloUtenti() {
     const [users, setUsers] = useState([] as User[]);
-    const [Abilitazione, setAbilitazione] = useState<{[Nomeu:string]:boolean}>({});
-    const [Immagine, setImmagine] = useState<{[Nomeu:string]:string}>({});
-    useEffect(() => {        
+    const [Abilitazione, setAbilitazione] = useState<{ [Nomeu: string]: boolean }>({});
+    const [Immagine, setImmagine] = useState<{ [Nomeu: string]: string }>({});
+    useEffect(() => {
         let isActive = true;
-        const fetchData = async () => {            
-            let data = await fetch("/Login/Getlistuser" , {method: 'GET'});
-            if(!isActive) return;
+        const fetchData = async () => {
+            let data = await fetch("/Login/Getlistuser", { method: 'GET' });
+            if (!isActive) return;
             var res = await data.json() as User[];
-            if(!isActive) return;
+            if (!isActive) return;
             setUsers(res);
-            if(isActive===true) 
-            {
-                setTimeout(()=>{
+            if (isActive === true) {
+                setTimeout(() => {
                     fetchData();
-                },500);
+                }, 500);
             }
         };
         fetchData();
-        return ()=>{isActive=false;}  //cleanup when component unmounts
-    },[]);
+        return () => { isActive = false; }  //cleanup when component unmounts
+    }, []);
 
 
     const p1 = useCallback(async (nomeU: string) => {
@@ -50,7 +49,7 @@ export function ControlloUtenti() {
                 [u.userName]: u.statoAccount
             }));
         });
-    },[users]);
+    }, [users]);
 
     useEffect(() => {
         users.map((u, _) => {
@@ -75,7 +74,7 @@ export function ControlloUtenti() {
         });
     }, [users]);
 
-    return (        
+    return (
         <div className="prova">
             <table border={2} width={500}>
                 <thead>
@@ -85,16 +84,16 @@ export function ControlloUtenti() {
                         <th className="tabella">Ruolo</th>
                         <th className="tabella">Sospendi L'account</th>
                         <th className="tabella">Online/Stato</th>
-                    </tr>  
-                </thead>          
+                    </tr>
+                </thead>
                 <tbody>
-                    { users.map( (u, i) =>
+                    {users.map((u, i) =>
                         <tr key={u.userName}>
                             <td className="tabella">{i}</td>
                             <td className="tabella">{u.userName}</td>
                             <td className="tabella">{u.role}</td>
                             <td className="tabella">
-                                <input className="form-check-input" type="checkbox" checked={!Abilitazione[u.userName]} onChange={()=>p1(u.userName)} id="invalidCheck1" required /> 
+                                <input className="form-check-input" type="checkbox" checked={!Abilitazione[u.userName]} onChange={() => p1(u.userName)} id="invalidCheck1" required />
                             </td>
                             <td className={"tabella"}> <img src={Immagine[u.userName]} className="ridotto"></img></td>
                         </tr>
