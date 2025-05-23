@@ -38,6 +38,7 @@ export function Layout(props: { setToken: (t: boolean) => void; p: boolean; Grad
                 <div className="container-fluid">
                     <div className="navbar-brand">{data}</div >
                     <div className="navbar-brand">Benvenuto {nomeUtente}</div>
+                    <button type="button" className=" btn btn-dark" onClick={Logout}>Logout</button>
                     <button className="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNavDarkDropdown" aria-controls="navbarNavDarkDropdown" aria-expanded="false" aria-label="Toggle navigation">
                         <span className="navbar-toggler-icon"></span>
                     </button>
@@ -56,7 +57,6 @@ export function Layout(props: { setToken: (t: boolean) => void; p: boolean; Grad
                                 </ul>
                             </li>
                         </ul>
-                        <button type="button" className=" btn btn-dark" onClick={Logout}>Logout</button>
                     </div>
                 </div>
             </nav>
