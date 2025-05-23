@@ -41,11 +41,12 @@ namespace provaweb
             {
                 var receive = await m_UDPClient.ReceiveAsync(stoppingToken);
                 var Mac = Encoding.ASCII.GetString(receive.Buffer);
-                var s = "ok";
+                var s = "Server collegato";
                 await m_UDPClient.SendAsync(Encoding.ASCII.GetBytes(s),s.Length, receive.RemoteEndPoint.Address.ToString(),8888);
                 var f = await m_registroEsp.dammiListaEsp();
-                var nome = f.Where(x => x.Key == Mac).Select(x => x.Value.NomeEspClient).FirstOrDefault();
-                var abi = f.Where(x => x.Key == Mac).Select(x => x.Value.abilitazione).FirstOrDefault();
+                var attuale = f.FirstOrDefault(x => x.Key == Mac);
+                var nome = attuale.Value.NomeEspClient;
+                var abi = attuale.Value.abilitazione;
                 await m_registroEsp.ModificareProgrammaEsp8266(Value_Esp8266.Empty with { ipEsp = receive.RemoteEndPoint.Address.ToString(), NomeEspClient = (nome != null ? nome : "esp"), abilitazione = abi }, Mac);
 
             }
