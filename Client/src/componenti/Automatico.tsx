@@ -13,7 +13,7 @@ interface key {
 }
 export function Automatico(props: { mac: string }) {
     const [r, setr] = useState([] as Oragiorno[]);
-
+    
     useEffect(() => {
         let isactive = true;
         const fetchData1 = async () => {

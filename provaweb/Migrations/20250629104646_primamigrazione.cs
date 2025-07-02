@@ -5,7 +5,7 @@
 namespace provaweb.Migrations
 {
     /// <inheritdoc />
-    public partial class migrationDatabase : Migration
+    public partial class primamigrazione : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)

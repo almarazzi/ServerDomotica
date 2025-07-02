@@ -45,8 +45,13 @@ namespace provaweb
                 await m_UDPClient.SendAsync(Encoding.ASCII.GetBytes(s),s.Length, receive.RemoteEndPoint.Address.ToString(),8888);
                 var f = await m_registroEsp.dammiListaEsp();
                 var attuale = f.FirstOrDefault(x => x.Key == Mac);
-                var nome = attuale.Value.NomeEspClient;
-                var abi = attuale.Value.abilitazione;
+                var nome = "";
+                var abi = false;
+                if (attuale.Value != null)
+                {
+                     nome = attuale.Value.NomeEspClient;
+                     abi = attuale.Value.abilitazione;
+                }
                 await m_registroEsp.ModificareProgrammaEsp8266(Value_Esp8266.Empty with { ipEsp = receive.RemoteEndPoint.Address.ToString(), NomeEspClient = (nome != null ? nome : "esp"), abilitazione = abi }, Mac);
 
             }

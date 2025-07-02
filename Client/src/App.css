@@ -451,3 +451,9 @@ text-align: -webkit-center;
   width: 50px;
   height: 50px;
 }
+.prova1234 {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: flex-start;
+  align-items: center;
+}

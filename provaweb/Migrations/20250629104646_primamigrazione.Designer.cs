@@ -10,14 +10,14 @@ using provaweb;
 namespace provaweb.Migrations
 {
     [DbContext(typeof(BloggingContext))]
-    [Migration("20240401142727_migrationDatabase")]
-    partial class migrationDatabase
+    [Migration("20250629104646_primamigrazione")]
+    partial class primamigrazione
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
-            modelBuilder.HasAnnotation("ProductVersion", "8.0.3");
+            modelBuilder.HasAnnotation("ProductVersion", "8.0.6");
 
             modelBuilder.Entity("provaweb.Users", b =>
                 {
