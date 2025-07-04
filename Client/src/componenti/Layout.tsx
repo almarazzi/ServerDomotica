@@ -38,7 +38,7 @@ export function Layout(props: { setToken: (t: boolean) => void; p: boolean; Grad
                 <div className="container-fluid ">
                     <div className="prova1234">
                         <div className="navbar-brand">{data}</div >
-                        <div className="navbar-brand">Benvenuto {nomeUtente}</div>
+                        <div className="navbar-brand">Benvenuto/a {nomeUtente}</div>
                         <button type="button" className=" btn btn-dark" onClick={Logout}>Logout</button>
                     </div>
                     <button className="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNavDarkDropdown" aria-controls="navbarNavDarkDropdown" aria-expanded="false" aria-label="Toggle navigation">
@@ -47,7 +47,7 @@ export function Layout(props: { setToken: (t: boolean) => void; p: boolean; Grad
                     <div className="collapse navbar-collapse" id="navbarNavDarkDropdown">
                         <ul className="navbar-nav">
                             <li className="nav-item dropdown">
-                                <a className="nav-link dropdown-toggle Menu" href="/#" id="navbarDarkDropdownMenuLink" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                                <a className="nav-link dropdown-toggle Menu" id="navbarDarkDropdownMenuLink" role="button" data-bs-toggle="dropdown" aria-expanded="false">
                                     Menu
                                 </a>
                                 <ul className="dropdown-menu dropdown-menu-dark" aria-labelledby="navbarDarkDropdownMenuLink">
@@ -62,7 +62,7 @@ export function Layout(props: { setToken: (t: boolean) => void; p: boolean; Grad
                     </div>
                 </div>
             </nav>
-            <Outlet />
+            <Outlet/>
         </Fragment>
     );
 }

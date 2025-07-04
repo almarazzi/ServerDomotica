@@ -1,5 +1,5 @@
 import './App.css';
-import { Routes, Route, HashRouter } from 'react-router-dom';
+import { Routes, Route, HashRouter, Navigate } from 'react-router-dom';
 import { useEffect, useState } from 'react';
 import  Layout  from './componenti/Layout';
 import  Automatico  from './componenti/Automatico';
@@ -66,7 +66,7 @@ function App() {
     };
     fetchData();
     return () => { isActive = false; }
-  }, []);
+  }, [token]);
 
 
   useEffect(() => {
@@ -98,13 +98,13 @@ function App() {
     larghezza();
   }, [])
 
-
   return (
     <div>
       <HashRouter>
         <Routes>
           <Route path="/Babylon" element={(grado === "Admin" || grado === "Basic" ? <Babylon mac={lista} /> : null)} />
           <Route path="/" element={(token === true ? <Layout setToken={setToken} p={SizeG} Grade={Getgrado} /> : <Signin setToken={setToken} />)}>
+            <Route index element={<Navigate to="/ESP" />} />
             <Route path="/CambiaPassword" element={(grado === "Admin" || grado === "Basic" ? <CambiaPassword /> : null)} />
             <Route path="/ESP" element={(grado === "Admin" || grado === "Basic" ? <Esp lista={lista}/> : null)} />
             <Route path="/NuovoAccount" element={(grado === "Admin" || grado === "root" ? <NuovoAccount /> : null)} />
