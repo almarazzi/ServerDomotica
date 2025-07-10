@@ -1,6 +1,7 @@
 ﻿using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
+
 namespace provaweb
 {
     [Route("[controller]")]
@@ -9,11 +10,13 @@ namespace provaweb
     {
         private readonly ILogger<apiEsp> m_logger;
         private readonly RegistroEsp m_registroEsp;
+        private readonly ContorolloEspOnline m_contorolloEspOnline;
 
-        public apiEsp(ILogger<apiEsp> logger, RegistroEsp registro)
+        public apiEsp(ILogger<apiEsp> logger, RegistroEsp registro, ContorolloEspOnline contorolloEspOnline)
         {
             m_logger = logger;
             m_registroEsp = registro;
+            m_contorolloEspOnline = contorolloEspOnline;
         }
 
         public record ESP(string nomeEsp, string mac);
@@ -23,7 +26,9 @@ namespace provaweb
         public async Task<IActionResult> ListaEsp()
         {
             var f = await m_registroEsp.dammiListaEsp();
-            return Ok(f.ToList());
+            var g = m_contorolloEspOnline.Offline;
+            var l = f.OrderBy(x =>g.Contains(x.Key)).ToList();
+            return Ok(l);
         }
         [HttpPut("NomeEsp")]
         [Authorize]
@@ -45,10 +50,10 @@ namespace provaweb
         }
         [HttpGet("StatoRelay")]
         [Authorize]
-        public IActionResult StatoEsp([FromServices] ContorolloEspOnline contorolloEspOnline)
+        public IActionResult StatoEsp()
         {
 
-            var f =  contorolloEspOnline.Offline;
+            var f =  m_contorolloEspOnline.Offline;
             return Ok(f);
         }
     }

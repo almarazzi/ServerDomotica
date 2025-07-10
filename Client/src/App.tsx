@@ -98,6 +98,8 @@ function App() {
     larghezza();
   }, [])
 
+
+  
   return (
     <div>
       <HashRouter>

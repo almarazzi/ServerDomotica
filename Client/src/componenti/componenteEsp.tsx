@@ -7,13 +7,12 @@ interface Tutto {
     state: boolean,
     macricever: string
 }
-
-export function ComponenteEsp(props: { mac: string, ip: string, Ablitazione: boolean, nome: string, isoffline :(a:{[mac:string]: boolean})=>void }) {
+export function ComponenteEsp(props: { mac: string, ip: string, Ablitazione: boolean, nome: string, isoffline : (Record<string, boolean>) }) {
     const [nomeEsp, SetnomeEsp] = useState("");
     const [mac, Setmac] = useState("");
     const [focus, setFocus] = useState(false);
     const [Ablitazione, setAbilitazione] = useState(false);
-    const [Isoffline, setIsoffline] = useState(true);
+    const [Isoffline, setIsoffline] = useState<Record<string,boolean>>({});
     const [M, setM] = useState(false);
     const [A, setA] = useState(false);
 
@@ -98,21 +97,19 @@ export function ComponenteEsp(props: { mac: string, ip: string, Ablitazione: boo
         let isactive = true;
         const fetchData = async () => {
             let data = await fetch("/apiEsp/StatoRelay", { method: 'GET' });
-            var res = await data.json() as [];
+            var res = await data.json() as string[];
             if (isactive) {
                 {
-                    res.map((u, _) => {
-                        if (u === props.mac) {
-                            setIsoffline(true);
-                            props.isoffline({[props.mac]: true});
-                        } else {
-                            setIsoffline(false);
-                            props.isoffline({[props.mac]: false});
-                        }
-                    })
-                    if (res.length === 0) {
-                        setIsoffline(false);
-                         props.isoffline({[props.mac]: false});
+                    if (res.includes(props.mac)) 
+                    {
+                        setIsoffline(statoPrev =>({
+                            ...statoPrev,
+                            [props.mac]: true
+                        }));
+                        props.isoffline[props.mac] =true
+                    }else {
+                        delete Isoffline[props.mac];
+                       delete props.isoffline[props.mac];
                     }
                 }
                 setTimeout(() => {
@@ -124,7 +121,7 @@ export function ComponenteEsp(props: { mac: string, ip: string, Ablitazione: boo
         return () => {
             isactive = false;
         };
-    }, [Isoffline]);
+    }, [props.mac]);
 
     return (
         <div className="ccccc" >
@@ -149,7 +146,7 @@ export function ComponenteEsp(props: { mac: string, ip: string, Ablitazione: boo
 
             <div className="ip">IP:{props.ip}</div>
             <div className="mac">MAC:{props.mac}</div>
-            <div className="ip">Stato Relay:{(Isoffline === true ? "Offline" : "Online")}</div>
+            <div className="ip">Stato Relay:{(Isoffline[props.mac] ? "Offline" : "Online")}</div>
             <div className="componenteAutoManu">
                 <input className="form-check-input casellaAuto" type="checkbox" checked={A} onChange={p1} id="invalidCheck1" required />
 

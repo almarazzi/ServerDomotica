@@ -11,12 +11,12 @@ interface key {
     value: Lista;
 }
 export function Esp(props: { lista: key[] }) {
-const [isOffline, setIsOffline] = useState<{[mac:string]:boolean}>({});
+const [isOffline] = useState<Record<string,boolean>>({});
 console.log(isOffline);
     return <Fragment>
         {props.lista.map((u, i) =>
-            <div className={isOffline[u.key]===true ? "Offline" : "Online"}>
-                <ComponenteEsp key={i} Ablitazione={u.value.abilitazione} ip={u.value.ipEsp} mac={u.key} nome={u.value.nomeEspClient}  isoffline={setIsOffline} />
+            <div className={isOffline[u.key] ? "Offline" : "Online"}>
+                <ComponenteEsp key={i} Ablitazione={u.value.abilitazione} ip={u.value.ipEsp} mac={u.key} nome={u.value.nomeEspClient}  isoffline={isOffline} />
             </div>
         )}
 
