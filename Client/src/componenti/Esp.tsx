@@ -1,4 +1,4 @@
-import { Fragment } from "react";
+import { Fragment, useState } from "react";
 import ComponenteEsp from "./componenteEsp";
 
 interface Lista {
@@ -11,11 +11,13 @@ interface key {
     value: Lista;
 }
 export function Esp(props: { lista: key[] }) {
-
-
+const [isOffline, setIsOffline] = useState<{[mac:string]:boolean}>({});
+console.log(isOffline);
     return <Fragment>
         {props.lista.map((u, i) =>
-            <ComponenteEsp key={i} abilitazioe={u.value.abilitazione} ip={u.value.ipEsp} mac={u.key} nome={u.value.nomeEspClient} />
+            <div className={isOffline[u.key]===true ? "Offline" : "Online"}>
+                <ComponenteEsp key={i} Ablitazione={u.value.abilitazione} ip={u.value.ipEsp} mac={u.key} nome={u.value.nomeEspClient}  isoffline={setIsOffline} />
+            </div>
         )}
 
     </Fragment>

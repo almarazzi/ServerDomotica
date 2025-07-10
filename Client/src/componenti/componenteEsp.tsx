@@ -8,12 +8,12 @@ interface Tutto {
     macricever: string
 }
 
-export function ComponenteEsp(props: { mac: string, ip: string, abilitazioe: boolean, nome: string }) {
+export function ComponenteEsp(props: { mac: string, ip: string, Ablitazione: boolean, nome: string, isoffline :(a:{[mac:string]: boolean})=>void }) {
     const [nomeEsp, SetnomeEsp] = useState("");
     const [mac, Setmac] = useState("");
     const [focus, setFocus] = useState(false);
-    const [abilitazione, setAbilitazione] = useState(false);//setAbilitazione
-    const [Isofline, setIsoffline] = useState(true);//setAbilitazione
+    const [Ablitazione, setAbilitazione] = useState(false);
+    const [Isoffline, setIsoffline] = useState(true);
     const [M, setM] = useState(false);
     const [A, setA] = useState(false);
 
@@ -28,12 +28,12 @@ export function ComponenteEsp(props: { mac: string, ip: string, abilitazioe: boo
 
     useEffect(() => {
         const api = async () => {
-            await fetch("/apiEsp/abilitazione", { body: JSON.stringify({ abilitazione: abilitazione, mac: mac }), method: "PUT", headers: { 'Content-type': 'application/json; charl set=UTF-8' } });
+            await fetch("/apiEsp/abilitazione", { body: JSON.stringify({ abilitazione: Ablitazione, mac: mac }), method: "PUT", headers: { 'Content-type': 'application/json; charl set=UTF-8' } });
         }
-        if (abilitazione !== null && mac !== "") {
+        if (Ablitazione !== null && mac !== "") {
             api();
         }
-    }, [abilitazione, mac]);
+    }, [Ablitazione, mac]);
 
     const y = useCallback(async () => {
 
@@ -104,12 +104,15 @@ export function ComponenteEsp(props: { mac: string, ip: string, abilitazioe: boo
                     res.map((u, _) => {
                         if (u === props.mac) {
                             setIsoffline(true);
+                            props.isoffline({[props.mac]: true});
                         } else {
                             setIsoffline(false);
+                            props.isoffline({[props.mac]: false});
                         }
                     })
                     if (res.length === 0) {
                         setIsoffline(false);
+                         props.isoffline({[props.mac]: false});
                     }
                 }
                 setTimeout(() => {
@@ -121,7 +124,7 @@ export function ComponenteEsp(props: { mac: string, ip: string, abilitazioe: boo
         return () => {
             isactive = false;
         };
-    }, [Isofline]);
+    }, [Isoffline]);
 
     return (
         <div className="ccccc" >
@@ -140,13 +143,13 @@ export function ComponenteEsp(props: { mac: string, ip: string, abilitazioe: boo
                     Setmac(props.mac);
                 }} />
             <div className="form-check input_check">
-                <input className="form-check-input" type="checkbox" checked={props.abilitazioe} onChange={(e) => { setAbilitazione(e.target.checked); Setmac(props.mac); }} id="abiliatazione" required />
+                <input className="form-check-input" type="checkbox" checked={props.Ablitazione} onChange={(e) => { setAbilitazione(e.target.checked); Setmac(props.mac); }} id="abiliatazione" required />
                 <label form="abiliatazione"> Abilitazione {props.nome}</label>
             </div>
 
             <div className="ip">IP:{props.ip}</div>
             <div className="mac">MAC:{props.mac}</div>
-            <div className="ip">Stato Relay:{(Isofline === true ? "Offline" : "Online")}</div>
+            <div className="ip">Stato Relay:{(Isoffline === true ? "Offline" : "Online")}</div>
             <div className="componenteAutoManu">
                 <input className="form-check-input casellaAuto" type="checkbox" checked={A} onChange={p1} id="invalidCheck1" required />
 

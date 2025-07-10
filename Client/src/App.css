@@ -457,3 +457,9 @@ text-align: -webkit-center;
   justify-content: flex-start;
   align-items: center;
 }
+.Offline {
+ opacity: 0.5;
+}
+.Online {
+ opacity: 1;
+}

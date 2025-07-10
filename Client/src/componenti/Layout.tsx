@@ -31,7 +31,7 @@ export function Layout(props: { setToken: (t: boolean) => void; p: boolean; Grad
         setNomeUtente(props.Grade.username);
     }, [props.Grade]);
 
-
+   
     return (
         <Fragment>
             <nav className="navbar navbar-expand-lg navbar-dark bg-dark iii">
