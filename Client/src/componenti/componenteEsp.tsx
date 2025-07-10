@@ -122,7 +122,6 @@ export function ComponenteEsp(props: { mac: string, ip: string, Ablitazione: boo
             isactive = false;
         };
     }, [props.mac]);
-
     return (
         <div className="ccccc" >
             <DebounceInput
@@ -150,12 +149,13 @@ export function ComponenteEsp(props: { mac: string, ip: string, Ablitazione: boo
             <div className="componenteAutoManu">
                 <input className="form-check-input casellaAuto" type="checkbox" checked={A} onChange={p1} id="invalidCheck1" required />
 
-                <Link to={"/Automatico/" + props.mac} className="bottoneAuto dropdown-item">
-                    <button type="button" className="btn btn-outline-primary ">Automatico</button>
+
+                <Link to={ (!Isoffline[props.mac] ? "/Automatico/" + props.mac : "")} className="bottoneAuto dropdown-item">
+                    <button disabled={Isoffline[props.mac]} type="button" className="btn btn-outline-primary ">Automatico</button>
                 </Link>
 
-                <Link to={"/Manuale/" + props.mac} className="bottoneManu dropdown-item">
-                    <button type="button" className="btn btn-outline-primary ">Manuale</button>
+                <Link to={(!Isoffline[props.mac] ? "/Manuale/" + props.mac: "")} className="bottoneManu dropdown-item">
+                    <button  disabled={Isoffline[props.mac]} type="button" className="btn btn-outline-primary ">Manuale</button>
                 </Link>
 
                 <input className="form-check-input casellaManu" type="checkbox" checked={M} onChange={y} id="invalidCheck" required />

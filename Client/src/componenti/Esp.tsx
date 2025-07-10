@@ -12,7 +12,6 @@ interface key {
 }
 export function Esp(props: { lista: key[] }) {
 const [isOffline] = useState<Record<string,boolean>>({});
-console.log(isOffline);
     return <Fragment>
         {props.lista.map((u, i) =>
             <div className={isOffline[u.key] ? "Offline" : "Online"}>
