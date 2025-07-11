@@ -35,6 +35,29 @@ export function Automatico(props: { mac: string }) {
             isactive = false;
         };
     }, []);
+
+      useEffect(() => {
+    let isactive = true;
+
+    const api = async () => {
+      let data = await fetch("/apiEsp/StatoRelay", { method: 'GET' });
+      var res = await data.json() as string[];
+      if (isactive) 
+      {
+        if(res.includes(props.mac)) {
+          window.location.href = "/";
+        }
+      }
+      setTimeout(()=>{
+        api();
+      },500);
+    };
+    api();
+    return ()=>{
+      isactive = false;
+    }
+  },[props.mac]);
+  
     return <Fragment>
         {
             [...Array(7)].map((_, i) =>
