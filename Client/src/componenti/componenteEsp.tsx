@@ -12,7 +12,7 @@ export function ComponenteEsp(props: { mac: string, ip: string, Ablitazione: boo
     const [mac, Setmac] = useState("");
     const [focus, setFocus] = useState(false);
     const [Ablitazione, setAbilitazione] = useState(false);
-    const [Isoffline, setIsoffline] = useState<Record<string,boolean>>({});
+    //const [Isoffline, setIsoffline] = useState<Record<string,boolean>>({});
     const [M, setM] = useState(false);
     const [A, setA] = useState(false);
 
@@ -102,15 +102,11 @@ export function ComponenteEsp(props: { mac: string, ip: string, Ablitazione: boo
                 {
                     if (res.includes(props.mac)) 
                     {
-                        setIsoffline(statoPrev =>({
-                            ...statoPrev,
-                            [props.mac]: true
-                        }));
                         props.isoffline[props.mac] =true
                     }else {
-                        delete Isoffline[props.mac];
                        delete props.isoffline[props.mac];
                     }
+
                 }
                 setTimeout(() => {
                     fetchData();
@@ -145,17 +141,17 @@ export function ComponenteEsp(props: { mac: string, ip: string, Ablitazione: boo
 
             <div className="ip">IP:{props.ip}</div>
             <div className="mac">MAC:{props.mac}</div>
-            <div className="ip">Stato Relay:{(Isoffline[props.mac] ? "Offline" : "Online")}</div>
+            <div className="ip">Stato Relay:{(props.isoffline[props.mac] ? "Offline" : "Online")}</div>
             <div className="componenteAutoManu">
                 <input className="form-check-input casellaAuto" type="checkbox" checked={A} onChange={p1} id="invalidCheck1" required />
 
 
-                <Link to={ (!Isoffline[props.mac] ? "/Automatico/" + props.mac : "")} className="bottoneAuto dropdown-item">
-                    <button disabled={Isoffline[props.mac]} type="button" className="btn btn-outline-primary ">Automatico</button>
+                <Link to={ (!props.isoffline[props.mac] ? "/Automatico/" + props.mac : "")} className="bottoneAuto dropdown-item">
+                    <button  type="button" className="btn btn-outline-primary ">Automatico</button>
                 </Link>
 
-                <Link to={(!Isoffline[props.mac] ? "/Manuale/" + props.mac: "")} className="bottoneManu dropdown-item">
-                    <button  disabled={Isoffline[props.mac]} type="button" className="btn btn-outline-primary ">Manuale</button>
+                <Link to={(!props.isoffline[props.mac] ? "/Manuale/" + props.mac: "")} className="bottoneManu dropdown-item">
+                    <button  type="button" className="btn btn-outline-primary ">Manuale</button>
                 </Link>
 
                 <input className="form-check-input casellaManu" type="checkbox" checked={M} onChange={y} id="invalidCheck" required />

@@ -241,27 +241,31 @@ namespace provaweb
                 pg = Re[mac][(int)d];
                 using var http = HttpClientFactory.CreateClient("ESPClient");
                 http.BaseAddress = new Uri("http://" + ip[mac].ipEsp);
+                var p = false;
                 if (ip[mac].abilitazione)
                 {
+   
                     if (Ms[mac].StateProgrammAuto == true && Ms[mac].StateProgrammManu == false)
                     {
                         var t = TimeOnly.FromDateTime(m_timeProvider.GetLocalNow().LocalDateTime);
-                        m_StateRelay = t.IsBetween(pg.OraInizio, pg.OraFine);
+                        p = t.IsBetween(pg.OraInizio, pg.OraFine);
 
                     }
                     else if (Ms[mac].StateProgrammAuto == false && Ms[mac].StateProgrammManu == true)
                     {
-                        m_StateRelay = StateRelay;
+                        p = StateRelay;
                     }
                     else
                     {
-                        m_StateRelay = false;
+                        p = false;
                     }
                 }
                 else
                 {
-                    m_StateRelay = false;
+                    p = false;
+                    StateRelay = p;
                 }
+                m_StateRelay = p;
                 if (m_stateRelayGet.Offline.Contains(mac))
                 {
                     await m_memoriaStati.Modifica(Ms[mac] with { StateRelay = false }, mac);
