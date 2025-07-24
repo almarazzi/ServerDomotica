@@ -12,14 +12,14 @@ namespace provaweb
         private readonly MemoriaStato m_memoriaStati;
         private readonly ProgrammaSettimanale m_programmaSettimanale;
         private readonly ContorolloEspOnline m_stateRelayGet;
-        private readonly IRelaySwitchService m_relaySwitchService;
-        public RelaySwitch(ILogger<RelaySwitch> logger, MemoriaStato memoriaStato, ProgrammaSettimanale programmaSettimanale, IRelaySwitchService relaySwitchService, ContorolloEspOnline stateRelayGet)
+        private readonly ProgrmmaModificaStatoRelay m_progrmmaModificaStatoRelay;
+        public RelaySwitch(ILogger<RelaySwitch> logger, MemoriaStato memoriaStato, ProgrammaSettimanale programmaSettimanale, ContorolloEspOnline stateRelayGet, ProgrmmaModificaStatoRelay progrmmaModificaStatoRelay)
         {
             m_logger = logger;
             m_memoriaStati = memoriaStato;
             m_programmaSettimanale = programmaSettimanale;
-            m_relaySwitchService = relaySwitchService;
             m_stateRelayGet = stateRelayGet;
+            m_progrmmaModificaStatoRelay = progrmmaModificaStatoRelay;
         }
         public record StateProgrammManu(bool stateProgrammManu, string macricever);
         public record StateProgrammAuto(bool stateProgrammAuto, string macricever);
@@ -38,8 +38,8 @@ namespace provaweb
             var f = y.Where(x => x.Key == setState.macricever).Select(x => x.Value.StateProgrammManu).First();
             if (f == true && !m_stateRelayGet.Offline.Contains(setState.macricever))
             {
-                m_relaySwitchService.StateRelay = setState.state;
-                m_relaySwitchService.mac = setState.macricever;
+                m_progrmmaModificaStatoRelay.StateRelay = setState.state;
+                m_progrmmaModificaStatoRelay.mac = setState.macricever;
             }
             return Ok();
         }

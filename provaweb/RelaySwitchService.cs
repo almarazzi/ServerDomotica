@@ -12,8 +12,8 @@ namespace provaweb
         public static IServiceCollection AddRelaySwitch(this IServiceCollection services)
         {
             services.AddSingleton<ProgrmmaModificaStatoRelay>();
-            services.AddSingleton<IRelaySwitchService>(s => s.GetRequiredService<ProgrmmaModificaStatoRelay>());
-            services.AddHostedService(s => s.GetRequiredService<ProgrmmaModificaStatoRelay>());
+           // services.AddSingleton<IRelaySwitchService>(s => s.GetRequiredService<ProgrmmaModificaStatoRelay>());
+            services.AddHostedService(s=>s.GetRequiredService<ProgrmmaModificaStatoRelay>());
             services.AddSingleton<MemoriaStato>();
             services.AddHttpClient("ESPClient");
             services.AddSingleton<ProgrammaSettimanale>();
@@ -23,11 +23,11 @@ namespace provaweb
         }
     }
 
-    public interface IRelaySwitchService
+  /*  public interface IRelaySwitchService
     {
         bool StateRelay { get; set; }
         string mac { get; set; }
-    }
+    }*/
     public record ProgrammaGiornaliero(DayOfWeek Day, TimeOnly OraInizio, TimeOnly OraFine)
     {
         public static readonly ProgrammaGiornaliero Empty = new(DayOfWeek.Sunday, TimeOnly.MinValue, TimeOnly.MinValue);
@@ -191,11 +191,22 @@ namespace provaweb
         }
     }
 
-    public class ProgrmmaModificaStatoRelay : BackgroundService, IRelaySwitchService
+    public class ProgrmmaModificaStatoRelay : BackgroundService
     {
-        private bool m_StateRelay { get; set; }
-        public bool StateRelay { get; set; }
-        public string mac { get; set; } = "";
+        private readonly object _lock = new();
+        private bool m_StateRelay = false;
+        private bool M_StateRelay = false;
+        private string M_mac = string.Empty;
+        public bool StateRelay
+        {
+            get { lock (_lock) { return M_StateRelay; } }
+            set { lock (_lock) { M_StateRelay = value; } }
+        }
+        public string mac 
+        { 
+            get { lock (_lock) { return M_mac; } } 
+            set { lock (_lock) { M_mac = value; } } 
+        }
         private readonly MemoriaStato m_memoriaStati;
         private readonly ProgrammaSettimanale m_programmaSettimanale;
         private readonly RegistroEsp m_programmaDizionarioEsp8266;
@@ -220,7 +231,7 @@ namespace provaweb
 
             while (!stoppingToken.IsCancellationRequested)
             {
-                if(string.IsNullOrEmpty(mac))
+                if(string.IsNullOrEmpty(M_mac))
                 {
                     await m_timeProvider.Delay(TimeSpan.FromMilliseconds(100), stoppingToken);
                     continue;
@@ -241,31 +252,30 @@ namespace provaweb
                 pg = Re[mac][(int)d];
                 using var http = HttpClientFactory.CreateClient("ESPClient");
                 http.BaseAddress = new Uri("http://" + ip[mac].ipEsp);
-                var p = false;
                 if (ip[mac].abilitazione)
                 {
    
                     if (Ms[mac].StateProgrammAuto == true && Ms[mac].StateProgrammManu == false)
                     {
                         var t = TimeOnly.FromDateTime(m_timeProvider.GetLocalNow().LocalDateTime);
-                        p = t.IsBetween(pg.OraInizio, pg.OraFine);
+                        m_StateRelay = t.IsBetween(pg.OraInizio, pg.OraFine);
 
                     }
                     else if (Ms[mac].StateProgrammAuto == false && Ms[mac].StateProgrammManu == true)
                     {
-                        p = StateRelay;
+                         m_StateRelay = StateRelay;
                     }
                     else
                     {
-                        p = false;
+                        m_StateRelay = false;
+                        StateRelay = m_StateRelay;
                     }
                 }
                 else
                 {
-                    p = false;
-                    StateRelay = p;
+                    m_StateRelay = false;
+                    StateRelay = m_StateRelay;
                 }
-                m_StateRelay = p;
                 if (m_stateRelayGet.Offline.Contains(mac))
                 {
                     await m_memoriaStati.Modifica(Ms[mac] with { StateRelay = false }, mac);
@@ -302,7 +312,7 @@ namespace provaweb
         {
             using var http = httpClient.CreateClient("ESPClient");
             http.BaseAddress = new Uri("http://" + ipEsp);
-            http.Timeout = TimeSpan.FromSeconds(3);
+            http.Timeout = TimeSpan.FromSeconds(2);
             try
             {
                 using var p = await http.GetAsync("/api/RelaySwitch/ping", stoppingToken);
@@ -325,7 +335,7 @@ namespace provaweb
                 {
                     if (m_EspOffline.TryGetValue(item.Key, out long value))
                     {
-                        if (timeProvider.GetElapsedTime(value).TotalSeconds < 10)
+                        if (timeProvider.GetElapsedTime(value).TotalSeconds < 5)
                         {
                             continue;
                         }
