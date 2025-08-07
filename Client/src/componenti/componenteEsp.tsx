@@ -93,31 +93,6 @@ export function ComponenteEsp(props: { mac: string, ip: string, Ablitazione: boo
         };
     }, []);
 
-    useEffect(() => {
-        let isactive = true;
-        const fetchData = async () => {
-            let data = await fetch("/apiEsp/StatoRelay", { method: 'GET' });
-            var res = await data.json() as string[];
-            if (isactive) {
-                {
-                    if (res.includes(props.mac)) 
-                    {
-                        props.isoffline[props.mac] =true
-                    }else {
-                       delete props.isoffline[props.mac];
-                    }
-
-                }
-                setTimeout(() => {
-                    fetchData();
-                }, 500);
-            }
-        };
-        fetchData();
-        return () => {
-            isactive = false;
-        };
-    }, [props.mac]);
     return (
         <div className="ccccc" >
             <DebounceInput
@@ -141,7 +116,6 @@ export function ComponenteEsp(props: { mac: string, ip: string, Ablitazione: boo
 
             <div className="ip">IP:{props.ip}</div>
             <div className="mac">MAC:{props.mac}</div>
-            <div className="ip">Stato Relay:{(props.isoffline[props.mac] ? "Offline" : "Online")}</div>
             <div className="componenteAutoManu">
                 <input className="form-check-input casellaAuto" type="checkbox" checked={A} onChange={p1} id="invalidCheck1" required />
 
