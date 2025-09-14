@@ -11,12 +11,7 @@ Il sistema permette di accendere/spegnere carichi elettrici da remoto, programma
 - [Come funziona](#come-funziona)  
 - [Architettura](#architettura)  
 - [Tecnologie](#tecnologie)  
-- [Installazione](#installazione)  
-- [Configurazione](#configurazione)  
-- [Esecuzione](#esecuzione)  
-- [Testing](#testing)  
-- [Contribuire](#contribuire)  
-- [Licenza](#licenza)  
+- [Installazione](#installazione)   
 
 ---
 
