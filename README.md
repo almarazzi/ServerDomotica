@@ -45,7 +45,8 @@ Struttura del repository:
 
 - **`domotica/`** → logica server per gestione dispositivi, relay e automazioni  
 - **`provaweb/`** → interfaccia web per il controllo e il monitoraggio  
-- **`testActiveUsersService/`** → progetto per i test del server  
+- **`testActiveUsersService/`** → progetto per i test del server
+- **`ProgettoEsp8266Server`** → Firmware per ESP8266
 - **`provaweb.sln`** → soluzione principale C#  
 - **`LICENSE`** → licenza MIT  
 
@@ -64,9 +65,11 @@ Struttura del repository:
 ## Installazione
 
 ### Prerequisiti
-- [.NET SDK](https://dotnet.microsoft.com/) (versione 6 o successiva)  
+- [.NET SDK](https://dotnet.microsoft.com/) (versione 8 o successiva)  
 - [Node.js](https://nodejs.org/) + npm (o yarn)  
 - Git installato  
+- [Arduino IDE](https://www.arduino.cc/en/software) per compilare e caricare firmware su ESP8266  
+- [Visual Studio Code](https://code.visualstudio.com/) con estensione [PlatformIO](https://platformio.org/) (opzionale, alternativa all’IDE Arduino)
 
 ### Clonare il repository
 ```bash
