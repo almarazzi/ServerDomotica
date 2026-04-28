@@ -5,13 +5,12 @@ export function CambiaPassword() {
     const [PasswordAtt, setPasswordAtt] = useState("");
     const [PasswordNuv, setPasswordNuv] = useState("");
     const [PasswordRib, setPasswordRib] = useState("");
-    const [invalid, setInvalid] = useState(false);
-    const [confronto, setConfronto] = useState(true);
+    const [confronto, setConfronto] = useState(false);
     const [pp, setPp] = useState(false);
     const [statobottone, setStatobottone] = useState(false);
 
     useEffect(() => {
-        if (invalid === true) {
+        if (PasswordRib.length >0) {
             setTimeout(() => {
                 if (PasswordNuv !== null)
                     if (PasswordRib === PasswordNuv) {
@@ -23,7 +22,7 @@ export function CambiaPassword() {
                 }
             }, 500);
         }
-    }, [PasswordNuv, PasswordRib, invalid]);
+    }, [PasswordNuv, PasswordRib]);
 
     const Cambio = useCallback(async () => {
 
@@ -63,7 +62,7 @@ export function CambiaPassword() {
             </div>
 
             <div className=" form-floating is-invalid is-valid md-3 Passwordt">
-                <input type="Password" value={PasswordRib} className={"form-control is-" + (confronto === true ? "" : "invalid")} placeholder=" " id="Password3" onChange={(a) => { setPasswordRib(a.target.value); setInvalid(true); }} onKeyDown={invio} />
+                <input type="Password" value={PasswordRib} className={"form-control is-" + (confronto === true ? "valid" : "invalid")} placeholder=" " id="Password3" onChange={(a) => { setPasswordRib(a.target.value); }} onKeyDown={invio} />
                 <label form="Password">Conferma Password</label>
             </div>
             <button type="button" className={"Bouttont btn btn-" + (statobottone === true ? "success" : "primary")} onClick={Cambio}>{statobottone === true ? "Cambiata" : "Cambia"}</button>

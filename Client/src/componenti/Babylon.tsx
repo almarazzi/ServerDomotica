@@ -150,9 +150,7 @@ export function Babylon(props: { mac: Array<key> }) {
     var r = new StandardMaterial("");
     r.diffuseColor = new Color3(0.45, 0.56, 0.53);
     irrigazione.material = r;
-    irrigazione.position.x = props.x;
-    irrigazione.position.y = 2.1;
-    irrigazione.position.z = props.z;
+    irrigazione.position = new Vector3(props.x,2.1,props.z);
     return irrigazione;
   };
 
