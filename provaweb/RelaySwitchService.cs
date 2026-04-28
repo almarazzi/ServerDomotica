@@ -36,7 +36,7 @@ namespace provaweb
     {
         private readonly AsyncLazy<ConcurrentDictionary<string, List<ProgrammaGiornaliero>>> m_Programma;
         private readonly static string s_percorso = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.CommonApplicationData), "provaweb/ProgrammaSettimanale.txt");
-        private readonly object _lock = new AsyncExclusiveLock();
+        private readonly AsyncLock _lock = new();
         private static RegistroEsp? m_programmaDizionarioEsp8266;
 
         public ProgrammaSettimanale(RegistroEsp registroEsp)
@@ -96,7 +96,7 @@ namespace provaweb
         public async Task SetProgrammaGiornaliero(ProgrammaGiornaliero pg, string mac)
         {
             int day = (int)pg.Day;
-            using (await _lock.AcquireLockAsync(CancellationToken.None))
+            using (await _lock.AcquireAsync(CancellationToken.None))
             {
                 if (m_Programma == null)
                 {
@@ -122,7 +122,7 @@ namespace provaweb
 
         private readonly AsyncLazy<ConcurrentDictionary<string, Stati>> m_Stati;
         private readonly static string s_percorso = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.CommonApplicationData), "provaweb/SetSati.txt");
-        private readonly object _lock = new AsyncExclusiveLock();
+        private readonly AsyncLock _lock = new();
         private static RegistroEsp? m_dizionarioEsp8266;
 
         public MemoriaStato(RegistroEsp registroEsp)
@@ -175,7 +175,7 @@ namespace provaweb
         public async Task Modifica(Stati y, string mac)
         {
 
-            using (await _lock.AcquireLockAsync(CancellationToken.None))
+            using (await _lock.AcquireAsync(CancellationToken.None))
             {
                 if (m_Stati == null)
                 {

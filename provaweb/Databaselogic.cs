@@ -31,10 +31,11 @@ namespace provaDatabase
             if (dd == null)
                 return;
 
-            var res = new PasswordHasher<object>().VerifyHashedPassword(null!, dd.Password, vecchiaPassword);
-            if (res == PasswordVerificationResult.Success || res == PasswordVerificationResult.SuccessRehashNeeded)
+            var OgettoPasswordHasher = new PasswordHasher<object>();
+            var Verifica = OgettoPasswordHasher.VerifyHashedPassword(null!, dd.Password, vecchiaPassword);
+            if (Verifica == PasswordVerificationResult.Success || Verifica == PasswordVerificationResult.SuccessRehashNeeded)
             {
-                dd.Password = new PasswordHasher<object>().HashPassword(null!, nuovaPassword);
+                dd.Password = new PasswordHasher<object>().HashPassword(dd, nuovaPassword);
                 await db.SaveChangesAsync();
             }
         }
@@ -54,16 +55,16 @@ namespace provaDatabase
             var dd = await db.Users.Where(x => x.UserName == nomeUtente).FirstOrDefaultAsync();
             if (dd != null)
             {
-
-                var res = new PasswordHasher<object>().VerifyHashedPassword(null!, dd.Password, password);
-                if (res == PasswordVerificationResult.SuccessRehashNeeded)
+                var OgettoPasswordHasher = new PasswordHasher<object>();
+                var Verifica = OgettoPasswordHasher.VerifyHashedPassword(dd, dd.Password, password);
+                if (Verifica == PasswordVerificationResult.SuccessRehashNeeded)
                 {
 
-                    dd.Password = new PasswordHasher<object>().HashPassword(null!, password);
+                    dd.Password = OgettoPasswordHasher.HashPassword(dd, password);
                     await db.SaveChangesAsync();
                 }
 
-                return new Oggect(dd.Ruolo, res == PasswordVerificationResult.Success || res == PasswordVerificationResult.SuccessRehashNeeded);
+                return new Oggect(dd.Ruolo, Verifica == PasswordVerificationResult.Success || Verifica == PasswordVerificationResult.SuccessRehashNeeded);
             }
 
             return new Oggect("", false);
