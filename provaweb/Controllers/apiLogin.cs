@@ -69,7 +69,6 @@ namespace provaweb.Controllers
 
                     };
                     var claimsIdentity = new ClaimsIdentity(claims,CookieAuthenticationDefaults.AuthenticationScheme);
-                    var claimsPrincipal = new ClaimsPrincipal(claimsIdentity);
 
                     var authProperties = new AuthenticationProperties
                     {
