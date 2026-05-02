@@ -10,6 +10,7 @@ var builder = WebApplication.CreateBuilder(args);
 builder.Services.AddSingleton(TimeProvider.System);
 builder.Services.AddSingleton<ActiveUsersService>();
 builder.Services.AddHostedService(sp => sp.GetRequiredService<ActiveUsersService>());
+builder.Services.AddSingleton(new DriveInfo("C:"));
 builder.Services.AddRelaySwitch();
 builder.Services.Addreceiver_esp8266Service();
 builder.Services.addServiceDatabase();

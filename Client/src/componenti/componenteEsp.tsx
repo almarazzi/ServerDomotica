@@ -54,7 +54,6 @@ export function ComponenteEsp(props: { mac: string, ip: string, Ablitazione: boo
                 }
                 setTimeout(() => {
                     fetchData();
-
                 }, 500);
             }
         };

@@ -81,6 +81,7 @@ export function Layout(props: { setToken: (t: boolean) => void; p: boolean; Grad
                                     <>
                                         <li>
                                             <Link to={"/ControlloUtenti"} className={"dropdown-item"}>ControlloUtenti</Link>
+                                            <Link to={"/DiagnosticaServer"} className={"dropdown-item"}>DiagnosticaServer</Link>
                                         </li>
                                     </>
                                     )}

@@ -39,7 +39,6 @@ export function ControlloUtenti() {
     const p1 = useCallback(async (nomeU: string) => {
         const inv = { Username: nomeU, StatoAccount: !Abilitazione[nomeU] };
         await fetch("/Login/StatoAccount", { body: JSON.stringify(inv), method: "PUT", headers: { 'Content-type': 'application/json; charl set=UTF-8' } });
-
     }, [Abilitazione]);
 
     useEffect(() => {

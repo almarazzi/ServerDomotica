@@ -10,6 +10,7 @@ import  NuovoAccount  from './componenti/NuovoAccount';
 import  ControlloUtenti  from './componenti/ControlloUtenti';
 import  Esp  from './componenti/Esp';
 import  Babylon  from './componenti/Babylon';
+import DiagnosticaServer from './componenti/DiagnosticaServer'
 
 
 interface Lista {
@@ -111,6 +112,7 @@ function App() {
             <Route path="/ESP" element={(grado === "Admin" || grado === "Basic" ? <Esp lista={lista}/> :  <Navigate to="/ESP" />)} />
             <Route path="/NuovoAccount" element={(grado === "Admin" || grado === "root" ? <NuovoAccount /> :  <Navigate to="/ESP" />)} />
             <Route path="/ControlloUtenti" element={(grado === "Admin" && SizeG === false ? <ControlloUtenti /> :  <Navigate to="/ESP" />)} />
+            <Route path="/DiagnosticaServer" element={(grado === "Admin"  ? <DiagnosticaServer /> :  <Navigate to="/ESP" />)} />
             {lista.map((u, i) =>
               <Route path={"/Automatico/" + u.key} element={(grado === "Admin" || grado === "Basic" ? <Automatico key={i} mac={u.key} /> : null)} />
             )}
