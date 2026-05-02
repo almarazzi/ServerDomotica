@@ -104,13 +104,13 @@ function App() {
     <div>
       <HashRouter>
         <Routes>
-          <Route path="/Babylon" element={(grado === "Admin" || grado === "Basic" ? <Babylon mac={lista} /> : null)} />
-          <Route path="/" element={(token === true ? <Layout setToken={setToken} p={SizeG} Grade={Getgrado} /> : <Signin setToken={setToken} />)}>
             <Route index element={<Navigate to="/ESP" />} />
-            <Route path="/CambiaPassword" element={(grado === "Admin" || grado === "Basic" ? <CambiaPassword /> : null)} />
-            <Route path="/ESP" element={(grado === "Admin" || grado === "Basic" ? <Esp lista={lista}/> : null)} />
-            <Route path="/NuovoAccount" element={(grado === "Admin" || grado === "root" ? <NuovoAccount /> : null)} />
-            <Route path="/ControlloUtenti" element={(grado === "Admin" && SizeG === false ? <ControlloUtenti /> : null)} />
+            <Route path="/Babylon" element={((grado === "Admin" || grado === "Basic") && SizeG === false ? <Babylon mac={lista} /> :  <Navigate to="/ESP" />)} />
+            <Route path="/" element={(token === true ? <Layout setToken={setToken} p={SizeG} Grade={Getgrado} /> : <Signin setToken={setToken} />)}>
+            <Route path="/CambiaPassword" element={(grado === "Admin" || grado === "Basic" ? <CambiaPassword /> :  <Navigate to="/ESP" />)} />
+            <Route path="/ESP" element={(grado === "Admin" || grado === "Basic" ? <Esp lista={lista}/> :  <Navigate to="/ESP" />)} />
+            <Route path="/NuovoAccount" element={(grado === "Admin" || grado === "root" ? <NuovoAccount /> :  <Navigate to="/ESP" />)} />
+            <Route path="/ControlloUtenti" element={(grado === "Admin" && SizeG === false ? <ControlloUtenti /> :  <Navigate to="/ESP" />)} />
             {lista.map((u, i) =>
               <Route path={"/Automatico/" + u.key} element={(grado === "Admin" || grado === "Basic" ? <Automatico key={i} mac={u.key} /> : null)} />
             )}

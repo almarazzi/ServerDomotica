@@ -1,7 +1,7 @@
 import moment from "moment";
 import { Fragment, useCallback, useEffect, useState } from "react";
 import { Link, Outlet } from "react-router-dom";
-import 'moment/locale/it';
+
 
 interface GetRuolo {
     readonly username: string;
@@ -31,6 +31,7 @@ export function Layout(props: { setToken: (t: boolean) => void; p: boolean; Grad
         setNomeUtente(props.Grade.username);
     }, [props.Grade]);
 
+
    
     return (
         <Fragment>
@@ -51,11 +52,38 @@ export function Layout(props: { setToken: (t: boolean) => void; p: boolean; Grad
                                     Menu
                                 </a>
                                 <ul className="dropdown-menu dropdown-menu-dark" aria-labelledby="navbarDarkDropdownMenuLink">
-                                    <li><Link to={"/" + (grado === "Admin" || grado === "Basic" ? "ESP" : null)} className={"" + (grado === "Admin" || grado === "Basic" ? "dropdown-item" : null)}>{(grado === "Admin" || grado === "Basic" ? "ESP" : null)}</Link></li>
-                                    <li><Link to={"/" + (grado === "Admin" || grado === "Basic" ? "CambiaPassword" : null)} className={"" + (grado === "Admin" || grado === "Basic" ? "dropdown-item" : null)}>{(grado === "Admin" || grado === "Basic" ? "CambiaPassword" : null)}</Link></li>
-                                    <li><Link to={"/" + (grado === "Admin" || grado === "root" ? "NuovoAccount" : null)} className={"" + (grado === "Admin" || grado === "root" ? "dropdown-item" : null)}>{(grado === "Admin" || grado === "root" ? "NuovoAccount" : null)}</Link></li>
-                                    <li><Link to={"/" + (grado === "Admin" || grado === "Basic" ? "Babylon" : null)} className={"" + (grado === "Admin" || grado === "Basic" ? "dropdown-item" : null)}>{(grado === "Admin" || grado === "Basic" ? "Mappa3D" : null)}</Link></li>
-                                    <li><Link to={"/" + (grado === "Admin" && props.p === false ? "ControlloUtenti" : null)} className={"" + (grado === "Admin" && props.p === false ? "dropdown-item" : null)}>{(grado === "Admin" && props.p === false ? "ControlloUtenti" : null)}</Link></li>
+                                    {(grado === "Admin" || grado === "Basic") &&(
+                                        <>
+                                            <li>
+                                                <Link to={"/ESP"} className={"dropdown-item"}>ESP</Link>
+                                            </li>
+                                            <li>
+                                                <Link to={"/CambiaPassword"} className={"dropdown-item"}>CambiaPassword</Link>
+                                            </li>
+                                            
+                                            {props.p === false &&(
+                                                <>
+                                                    <li>
+                                                        <Link to={"/Babylon"} className={"dropdown-item"}>Mappa3D</Link>
+                                                    </li>
+                                                </>
+                                            )}
+                                        </>
+                                    )}
+                                      {(grado === "Admin" || grado === "root") &&(
+                                        <>
+                                            <li>
+                                                <Link to={"/NuovoAccount"} className={"dropdown-item"}> NuovoAccount</Link>
+                                            </li>
+                                        </>
+                                    )}
+                                    {(grado === "Admin") &&(
+                                    <>
+                                        <li>
+                                            <Link to={"/ControlloUtenti"} className={"dropdown-item"}>ControlloUtenti</Link>
+                                        </li>
+                                    </>
+                                    )}
                                 </ul>
                             </li>
                         </ul>
