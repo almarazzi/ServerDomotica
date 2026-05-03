@@ -42,7 +42,7 @@ return ()=>{isActive = false}
             <div className="Diag fw-bolder" >Spazio Libero sul disco PC server: {SpazioLibero} gb</div>
             <div className="Diag fw-bolder" >Spazio Occupato sul disco PC server: {SpazioOccupato} gb</div>
             <div className="progress">
-            <div className=" progress-bar bg-success" role="progressbar" style={{ width: tot + '%' }} aria-valuemin={0} aria-valuemax={100}></div>
+            <div className=" progress-bar bg-success" role="progressbar" style={{ width: tot.toFixed(2) + '%' }} aria-valuemin={0} aria-valuemax={100}></div>
             </div>
         </div>
     );

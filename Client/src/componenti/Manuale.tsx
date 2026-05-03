@@ -1,5 +1,5 @@
 import { useEffect, useState, Fragment } from "react";
-
+import * as signalR from "@microsoft/signalr"
 interface Tutto {
   state: boolean,
   macricever: string
@@ -7,32 +7,35 @@ interface Tutto {
 export function Manuale(props: { mac: string }) {
   const [state, stateOn] = useState(false);
 
-  useEffect(() => {
-    let isactive = true;
 
-    const fetchData = async () => {
 
-      let data = await fetch("/api/RelaySwitch/GetState", { method: 'GET' });
+  useEffect(()=>{
+     const fetchData = async () => {
+
+      let data = await fetch("/api/RelaySwitch/GetState", { method: 'GET' }); //prima Volta
       var res = await data.json() as Tutto[];
-
-      if (isactive) {
-        res.map((u, _) => {
-          if (u.macricever === props.mac)
-            stateOn(u.state);
-        })
-        setTimeout(() => {
-          fetchData();
-        }, 500);
-      }
+      res.map((u, _) => {
+        if (u.macricever === props.mac)
+          stateOn(u.state);
+      });
     };
 
-    fetchData();
-    return () => {
-      isactive = false;
-    };
-  }, []);
+    const con = new signalR.HubConnectionBuilder().withUrl("/relaySwitchHub").build();
 
-  useEffect(() => {
+    con.on("CambioStatoRealy",(a:Tutto[])=>{
+      a.forEach(element => {
+          if(element.macricever === props.mac)
+            stateOn(element.state)
+      });
+    });
+    fetchData(); //prima Volta
+    con.start().catch(err => console.error(err.toString()));
+
+    return(()=>{con.stop()})
+
+  },[props.mac,stateOn])
+  
+useEffect(()=>{
     let isactive = true;
 
     const api = async () => {
@@ -70,5 +73,28 @@ export function Manuale(props: { mac: string }) {
   );
 }
 
+/*useEffect(() => {
+    let isactive = true;
 
+    const fetchData = async () => {
+
+      let data = await fetch("/api/RelaySwitch/GetState", { method: 'GET' });
+      var res = await data.json() as Tutto[];
+
+      if (isactive) {
+        res.map((u, _) => {
+          if (u.macricever === props.mac)
+            stateOn(u.state);
+        })
+        setTimeout(() => {
+          fetchData();
+        }, 500);
+      }
+    };
+
+    fetchData();
+    return () => {
+      isactive = false;
+    };
+  }, []);*/
 export default Manuale;

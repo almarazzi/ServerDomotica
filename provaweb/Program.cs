@@ -12,6 +12,8 @@ builder.Services.AddSingleton<ActiveUsersService>();
 builder.Services.AddHostedService(sp => sp.GetRequiredService<ActiveUsersService>());
 builder.Services.AddSingleton(new DriveInfo("C:"));
 builder.Services.AddRelaySwitch();
+builder.Services.AddSignalR();
+builder.Services.AddSingleton<relaySwitchHub>();
 builder.Services.Addreceiver_esp8266Service();
 builder.Services.addServiceDatabase();
 builder.Services.AddControllers();
@@ -63,7 +65,10 @@ builder.Services.AddAuthentication(CookieAuthenticationDefaults.AuthenticationSc
 
 
 
+
 var app = builder.Build();
+
+app.MapHub<relaySwitchHub>("relaySwitchHub");
 
 var asmDir = Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location);
 

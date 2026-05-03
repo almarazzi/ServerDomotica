@@ -124,6 +124,7 @@ namespace provaweb
         private readonly static string s_percorso = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.CommonApplicationData), "provaweb/SetSati.txt");
         private readonly AsyncLock _lock = new();
         private static RegistroEsp? m_dizionarioEsp8266;
+        public event Action Evento;
 
         public MemoriaStato(RegistroEsp registroEsp)
         {
@@ -187,6 +188,7 @@ namespace provaweb
                     stati[mac] = y;
                     await Salva();
                 }
+                Evento.Invoke();
             }
         }
     }
@@ -306,6 +308,7 @@ namespace provaweb
         //public IReadOnlyDictionary<string, long> Offline = ImmutableDictionary<string, long>.Empty;
         //public IReadOnlySet<string> Offline = ImmutableHashSet<string>.Empty;
         public IReadOnlyList<string> Offline = Array.Empty<string>();
+       // public event Action Evento;
 
 
         private async Task<(string key, bool result)> TestItem(string key, string ipEsp, CancellationToken stoppingToken)

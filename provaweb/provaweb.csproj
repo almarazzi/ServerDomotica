@@ -14,7 +14,6 @@
   </ItemGroup>
 
   <ItemGroup>
-    <PackageReference Include="AspNetCore.Proxy" Version="4.5.0" />
     <PackageReference Include="DotNext.Threading" Version="6.1.0" />
 	<PackageReference Include="Microsoft.Bcl.TimeProvider" Version="10.0.7" />
     <PackageReference Include="Microsoft.EntityFrameworkCore.Sqlite" Version="10.0.7" />
@@ -23,7 +22,7 @@
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
     </PackageReference>
     <PackageReference Include="SoloX.CodeQuality.Test.Helpers" Version="3.0.0" />
-    <PackageReference Include="Swashbuckle.AspNetCore" Version="10.1.7" />
+	  <PackageReference Include="Swashbuckle.AspNetCore" Version="10.1.7" />
     <PackageReference Include="System.Device.Gpio" Version="4.2.0" />
 
 </ItemGroup>

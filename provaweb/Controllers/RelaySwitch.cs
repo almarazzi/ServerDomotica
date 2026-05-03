@@ -1,25 +1,32 @@
 ﻿using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.SignalR;
+
 
 namespace provaweb
 {
     [Route("api/[controller]")]
     [ApiController]
 
-    public class RelaySwitch : ControllerBase
+    public class RelaySwitch :  ControllerBase
     {
         private readonly ILogger<RelaySwitch> m_logger;
         private readonly MemoriaStato m_memoriaStati;
         private readonly ProgrammaSettimanale m_programmaSettimanale;
         private readonly ContorolloEspOnline m_stateRelayGet;
         private readonly ProgrmmaModificaStatoRelay m_progrmmaModificaStatoRelay;
-        public RelaySwitch(ILogger<RelaySwitch> logger, MemoriaStato memoriaStato, ProgrammaSettimanale programmaSettimanale, ContorolloEspOnline stateRelayGet, ProgrmmaModificaStatoRelay progrmmaModificaStatoRelay)
+
+        private readonly IHubContext<relaySwitchHub> _hub;
+
+        public RelaySwitch(ILogger<RelaySwitch> logger, MemoriaStato memoriaStato, ProgrammaSettimanale programmaSettimanale, ContorolloEspOnline stateRelayGet, ProgrmmaModificaStatoRelay progrmmaModificaStatoRelay, IHubContext<relaySwitchHub> hubContext)
         {
             m_logger = logger;
             m_memoriaStati = memoriaStato;
             m_programmaSettimanale = programmaSettimanale;
             m_stateRelayGet = stateRelayGet;
             m_progrmmaModificaStatoRelay = progrmmaModificaStatoRelay;
+            _hub = hubContext;
+
         }
         public record StateProgrammManu(bool stateProgrammManu, string macricever);
         public record StateProgrammAuto(bool stateProgrammAuto, string macricever);
@@ -49,7 +56,8 @@ namespace provaweb
         public async Task<IActionResult> GetState()
         {
             var y = await m_memoriaStati.DammiStati();
-            return Ok(y.Select(x => new Oggreturn(x.Value.StateRelay, x.Key)));
+            var s = y.Select(x => new Oggreturn(x.Value.StateRelay, x.Key));
+            return Ok(s);
 
         }
 
