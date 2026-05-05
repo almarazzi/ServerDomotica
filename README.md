@@ -57,8 +57,8 @@ Struttura del repository:
 - **Backend** → ASP.NET Core (C#)  
 - **Frontend** → TypeScript + React + Vite  
 - **Dispositivi** → ESP8266 con firmware per ricevere comandi HTTP  
-- **Database** → (da specificare: SQLite / SQL Server / altro, se previsto)  
-- **Testing** → xUnit / NUnit (per il backend)  
+- **Database** → SQLite 
+- **Testing** → xUnit (per il backend)  
 
 ---
 
