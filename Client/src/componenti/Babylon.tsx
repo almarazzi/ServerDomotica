@@ -11,7 +11,7 @@ import { LoadAssetContainerAsync } from "@babylonjs/core/Loading";
 import { StandardMaterial } from "@babylonjs/core/Materials/standardMaterial";
 import { CreateCylinder } from "@babylonjs/core/Meshes/Builders/cylinderBuilder";
 
-//import {Inspector} from  '@babylonjs/inspector';  //inspector indeciso se lasciarlo o no 
+//import {Inspector} from  '@babylonjs/inspector';  //inspector mi serve solo nella vase di debug IMPORTANTE
 import Automatico from "./Automatico";
 import Manuale from "./Manuale";
 interface Lista {
