@@ -64,7 +64,7 @@ export function Babylon(props: { mac: Array<key> }) {
     engine.runRenderLoop(() => {
       scene.render();
     });
-    /*Inspector.Show(scene, {  //inspector indeciso se lasciarlo o no 
+    /*Inspector.Show(scene, {  //inspector mi serve solo nella vase di debug IMPORTANTE
       embedMode:true,
       overlay:true,
       showInspector:true,
