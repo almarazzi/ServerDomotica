@@ -47,7 +47,7 @@ namespace provaweb
                 }
                 if (Evento is not null)
                     await Evento.Invoke();
-                await m_timeProvider.Delay(TimeSpan.FromSeconds(5), stoppingToken);
+                await m_timeProvider.Delay(TimeSpan.FromSeconds(3), stoppingToken);
             }
         }
 
