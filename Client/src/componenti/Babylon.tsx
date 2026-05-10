@@ -12,7 +12,7 @@ import { StandardMaterial } from "@babylonjs/core/Materials/standardMaterial";
 import { CreateCylinder } from "@babylonjs/core/Meshes/Builders/cylinderBuilder";
 import * as signalR from "@microsoft/signalr"
 
-//import {Inspector} from  '@babylonjs/inspector';  //inspector indeciso se lasciarlo o no 
+//import {Inspector} from  '@babylonjs/inspector';  //inspector mi serve solo nella vase di debug IMPORTANTE
 import Automatico from "./Automatico";
 import Manuale from "./Manuale";
 interface Lista {
@@ -65,7 +65,7 @@ export function Babylon(props: { mac: Array<key> }) {
     engine.runRenderLoop(() => {
       scene.render();
     });
-    /*Inspector.Show(scene, {  //inspector indeciso se lasciarlo o no 
+    /*Inspector.Show(scene, {  //inspector mi serve solo nella vase di debug IMPORTANTE
       embedMode:true,
       overlay:true,
       showInspector:true,
