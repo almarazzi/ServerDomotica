@@ -1,6 +1,7 @@
 import { useCallback, useEffect, useState } from "react";
 import { DebounceInput } from "react-debounce-input";
 import { Link } from "react-router-dom";
+import * as signalR from "@microsoft/signalr"
 
 
 interface Tutto {
@@ -40,27 +41,22 @@ export function ComponenteEsp(props: { mac: string, ip: string, Ablitazione: boo
         await fetch("/api/RelaySwitch/stateProgrammManu", { method: "PUT", body: JSON.stringify(inv), headers: { 'Content-type': 'application/json; charl set=UTF-8' } });
     }, [M]);
     useEffect(() => {
-        let isactive = true;
-        const fetchData = async () => {
-            let data = await fetch("/api/RelaySwitch/GetProgrammManu", { method: 'GET' });
-            var res = await data.json() as Tutto[];
-            if (isactive) {
-                {
-                    res.map((u, _) => {
+         const con = new signalR.HubConnectionBuilder().withUrl("/relaySwitchHub").build();
+                
+                con.on("GetProgmmaManu",(a:Tutto[])=>{
+                     a.map((u, _) => {
                         if (u.macricever === props.mac) {
                             setM(u.state)
                         }
                     })
+                    });
+                con.start().catch(err => console.error(err.toString()));
+        
+            return(()=>{
+                if (con.state === signalR.HubConnectionState.Connected) {
+                    con.stop().catch(err => console.error("Errore SignalR stop:", err));
                 }
-                setTimeout(() => {
-                    fetchData();
-                }, 500);
-            }
-        };
-        fetchData();
-        return () => {
-            isactive = false;
-        };
+            });
     }, []);
 
     const p1 = useCallback(async () => {
@@ -69,27 +65,22 @@ export function ComponenteEsp(props: { mac: string, ip: string, Ablitazione: boo
     }, [A]);
 
     useEffect(() => {
-        let isactive = true;
-        const fetchData1 = async () => {
-            let data = await fetch("/api/RelaySwitch/GetProgrammAuto", { method: 'GET' });
-            let res = await data.json() as Tutto[];
-            if (isactive) {
-                {
-                    res.map((u, _) => {
+        const con = new signalR.HubConnectionBuilder().withUrl("/relaySwitchHub").build();
+                
+                con.on("GetProgmmaAuto",(a:Tutto[])=>{
+                     a.map((u, _) => {
                         if (u.macricever === props.mac) {
                             setA(u.state)
                         }
                     })
+                    });
+                con.start().catch(err => console.error(err.toString()));
+        
+            return(()=>{
+                if (con.state === signalR.HubConnectionState.Connected) {
+                    con.stop().catch(err => console.error("Errore SignalR stop:", err));
                 }
-                setTimeout(() => {
-                    fetchData1();
-                }, 500);
-            }
-        };
-        fetchData1();
-        return () => {
-            isactive = false;
-        };
+            });
     }, []);
 
     return (
@@ -134,3 +125,28 @@ export function ComponenteEsp(props: { mac: string, ip: string, Ablitazione: boo
     );
 }
 export default ComponenteEsp;
+
+
+/* useEffect(() => {
+        let isactive = true;
+        const fetchData = async () => {
+            let data = await fetch("/api/RelaySwitch/GetProgrammManu", { method: 'GET' });
+            var res = await data.json() as Tutto[];
+            if (isactive) {
+                {
+                    res.map((u, _) => {
+                        if (u.macricever === props.mac) {
+                            setM(u.state)
+                        }
+                    })
+                }
+                setTimeout(() => {
+                    fetchData();
+                }, 500);
+            }
+        };
+        fetchData();
+        return () => {
+            isactive = false;
+        };
+    }, []);*/

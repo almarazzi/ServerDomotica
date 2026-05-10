@@ -1,5 +1,6 @@
 import { Fragment, useEffect, useState, } from "react";
 import DayAutomatico from "./DayAutomatico";
+import * as signalR from "@microsoft/signalr"
 
 
 interface Oragiorno {
@@ -15,47 +16,41 @@ export function Automatico(props: { mac: string }) {
     const [r, setr] = useState([] as Oragiorno[]);
     
     useEffect(() => {
-        let isactive = true;
-        const fetchData1 = async () => {
-            let data = await fetch("/api/RelaySwitch/GetWeekProgram", { method: 'GET' });
-            var res = await data.json() as key[];
-            res.map((u, _) => {
+
+        const con = new signalR.HubConnectionBuilder().withUrl("/relaySwitchHub").build();
+    
+          con.on("ProgrammaSettimanale",(a:key[])=>{
+            a.map((u, _) => {
                 if (u.key === props.mac) {
                     setr(u.value);
                 }
             })
-            if (isactive) {
-                setTimeout(() => {
-                    fetchData1();
-                }, 500);
-            }
-        };
-        fetchData1();
-        return () => {
-            isactive = false;
-        };
+        });
+        con.start().catch(err => console.error(err.toString()));
+    
+        return(()=>{ 
+          if (con.state === signalR.HubConnectionState.Connected) {
+            con.stop().catch(err => console.error("Errore SignalR stop:", err));
+        }});
+    
     }, []);
 
-      useEffect(() => {
-    let isactive = true;
-
-    const api = async () => {
-      let data = await fetch("/apiEsp/StatoRelay", { method: 'GET' });
-      var res = await data.json() as string[];
-      if (isactive) 
-      {
-        if(res.includes(props.mac)) {
-          window.location.href = "/";
-        }
-      }
-      setTimeout(()=>{
-        api();
-      },500);
-    };
-    api();
-    return ()=>{
-      isactive = false;
-    }
+useEffect(() => {
+   
+    const con = new signalR.HubConnectionBuilder().withUrl("/relaySwitchHub").build();
+    
+          con.on("StatoRelayOff",(a:String[])=>{
+           if(a.includes(props.mac)) {
+              window.location.href = "/";
+            }
+        });
+        con.start().catch(err => console.error(err.toString()));
+    
+        return(()=>{ 
+          if (con.state === signalR.HubConnectionState.Connected) {
+            con.stop().catch(err => console.error("Errore SignalR stop:", err));
+          }});
+    
   },[props.mac]);
   
     return <Fragment>

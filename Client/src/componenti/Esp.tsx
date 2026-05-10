@@ -1,5 +1,6 @@
 import { Fragment, useState,useEffect } from "react";
 import ComponenteEsp from "./componenteEsp";
+import * as signalR from "@microsoft/signalr"
 
 interface Lista {
     readonly nomeEspClient: string;
@@ -13,36 +14,34 @@ interface key {
 export function Esp(props: { lista: key[] }) {
 const [isOffline, setIsoffline] = useState<Record<string,boolean>>({});
 
+useEffect(()=>{
 
-    useEffect(() => {
-        let isactive = true;
-        const fetchData = async () => {
-            let data = await fetch("/apiEsp/StatoRelay", { method: 'GET' });
-            var res = await data.json() as string[];
-            if (isactive) {
-                {
-                    if (res.includes(props.lista.map(u=>u.key).toString()))
-                    {
-                       setIsoffline(statoAttuale =>({
-                        ...statoAttuale,
-                        [props.lista.map(u=>u.key).toString()]: true
+    const con = new signalR.HubConnectionBuilder().withUrl("/relaySwitchHub").build();
+        
+        con.on("StatoRelayOff",(a:String[])=>{
+            setIsoffline(statoAttuale =>{
+                const staotN = {...statoAttuale};
+                    props.lista.forEach(u =>{
+                        if(a.includes(u.key))
+                        {
+                            staotN[u.key] = true;
+                        }else
+                        {
+                            delete staotN[u.key];
+                        }
+                    });
+                    return staotN
+                });
+            });
+        con.start().catch(err => console.error(err.toString()));
 
-                       }));
-                    }else {
-                      delete isOffline[props.lista.map(u=>u.key).toString()];
-                    }
+        return(()=>{
+        if (con.state === signalR.HubConnectionState.Connected) {
+            con.stop().catch(err => console.error("Errore SignalR stop:", err));
+        }});
 
-                }
-                setTimeout(() => {
-                    fetchData();
-                }, 500);
-            }
-        };
-        fetchData();
-        return () => {
-            isactive = false;
-        };
-    }, [props.lista]);
+},[props.lista]);
+
     return <Fragment>
         {props.lista.map((u, i) =>
             <div className={isOffline[u.key] ? "Offline" : "Online"}>

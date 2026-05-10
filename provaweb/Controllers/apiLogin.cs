@@ -137,16 +137,6 @@ namespace provaweb.Controllers
             var ruolo = User.Claims.Where(x => x.Type == ClaimTypes.Role).Select(x => x.Value).First();
             return Ok(new getRuolo(NomeUtente!, ruolo));
         }
-
-
-        [HttpGet("Getlistuser")]
-        [Authorize(Roles = "Admin")]
-        public async Task<ActionResult<IEnumerable<UserDatabase>>> Getlistuser([FromServices] ActiveUsersService activeUsers)
-        {
-            var u = await dblogic.UtentiDatabase1();
-            return Ok(u.Select(x => new UserDatabase(x.UserName, x.Ruolo, activeUsers.IsActive(x.UserName), x.StatoAccount)));
-        }
-
         [HttpPut("StatoAccount")]
         [Authorize(Roles = "Admin")]
         public async Task<IActionResult> StatoAccount(StatoAccount1 statoAccount1)

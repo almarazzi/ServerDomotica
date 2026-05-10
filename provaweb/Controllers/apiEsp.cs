@@ -21,15 +21,7 @@ namespace provaweb
 
         public record ESP(string nomeEsp, string mac);
         public record Abilitazione(bool abilitazione, string mac);
-        [HttpGet("ListaEsp")]
-        [Authorize]
-        public async Task<IActionResult> ListaEsp()
-        {
-            var f = await m_registroEsp.dammiListaEsp();
-            var g = m_contorolloEspOnline.Offline;
-            var l = f.OrderBy(x =>g.Contains(x.Key)).ToList();
-            return Ok(l);
-        }
+
         [HttpPut("NomeEsp")]
         [Authorize]
         public async Task<IActionResult> NomeEsp(ESP esp)
@@ -47,14 +39,6 @@ namespace provaweb
             var f = await m_registroEsp.dammiListaEsp();
             await m_registroEsp.ModificareProgrammaEsp8266(f[abilitazione.mac] with { abilitazione = abilitazione.abilitazione}, abilitazione.mac);
             return Ok();
-        }
-        [HttpGet("StatoRelay")]
-        [Authorize]
-        public IActionResult StatoEsp()
-        {
-
-            var f =  m_contorolloEspOnline.Offline;
-            return Ok(f);
         }
     }
 }

@@ -2,6 +2,7 @@ import { useCallback, useEffect, useState } from "react";
 import OfflineNonAbilitato from "./OfflineNonAbilitato.png";
 import OfflineAblitato from './OfflineAbilitato.png';
 import OnlineAblitato from "./OnlineAbilitato.png";
+import * as signalR from "@microsoft/signalr"
 
 
 interface User {
@@ -18,21 +19,17 @@ export function ControlloUtenti() {
     const [Abilitazione, setAbilitazione] = useState<{ [Nomeu: string]: boolean }>({});
     const [Immagine, setImmagine] = useState<{ [Nomeu: string]: string }>({});
     useEffect(() => {
-        let isActive = true;
-        const fetchData = async () => {
-            let data = await fetch("/Login/Getlistuser", { method: 'GET' });
-            if (!isActive) return;
-            var res = await data.json() as User[];
-            if (!isActive) return;
-            setUsers(res);
-            if (isActive === true) {
-                setTimeout(() => {
-                    fetchData();
-                }, 500);
-            }
-        };
-        fetchData();
-        return () => { isActive = false; }  //cleanup when component unmounts
+        const con = new signalR.HubConnectionBuilder().withUrl("/relaySwitchHub").build();
+    
+        con.on("Getlistuser",(a:User[])=>{
+           setUsers(a);
+        });
+        con.start().catch(err => console.error(err.toString()));
+
+        return(()=>{
+            if (con.state === signalR.HubConnectionState.Connected) {
+                con.stop().catch(err => console.error("Errore SignalR stop:", err));
+            }});
     }, []);
 
 
@@ -103,3 +100,21 @@ export function ControlloUtenti() {
     );
 }
 export default ControlloUtenti;
+
+
+/* let isActive = true;
+        const fetchData = async () => {
+            let data = await fetch("/Login/Getlistuser", { method: 'GET' });
+            if (!isActive) return;
+            var res = await data.json() as User[];
+            if (!isActive) return;
+            setUsers(res);
+            if (isActive === true) {
+                setTimeout(() => {
+                    fetchData();
+                }, 500);
+            }
+        };
+        fetchData();
+        return () => { isActive = false; }  //cleanup when component unmounts
+*/

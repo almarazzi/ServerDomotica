@@ -10,6 +10,7 @@ import { HemisphericLight } from "@babylonjs/core/Lights/hemisphericLight";
 import { LoadAssetContainerAsync } from "@babylonjs/core/Loading";
 import { StandardMaterial } from "@babylonjs/core/Materials/standardMaterial";
 import { CreateCylinder } from "@babylonjs/core/Meshes/Builders/cylinderBuilder";
+import * as signalR from "@microsoft/signalr"
 
 //import {Inspector} from  '@babylonjs/inspector';  //inspector indeciso se lasciarlo o no 
 import Automatico from "./Automatico";
@@ -126,21 +127,18 @@ export function Babylon(props: { mac: Array<key> }) {
 
 
   useEffect(() => {
-    let active = true;
-    const fetchApi = async () => {
-      let data = await fetch("/api/RelaySwitch/GetState", { method: 'GET', headers: { 'Content-type': 'application/json; charl set=UTF-8' } });
-      var res = await data.json() as Tutto[];
-      if (active) {
-        setRelayActive(res);
-        setTimeout(() => {
-          fetchApi();
-        }, 500);
-      }
-    };
-    fetchApi();
-    return () => {
-      active = false;
-    };
+    const con = new signalR.HubConnectionBuilder().withUrl("/relaySwitchHub").build();
+
+    con.on("CambioStatoRealy",(a:Tutto[])=>{
+        setRelayActive(a);
+      });
+    con.start().catch(err => console.error(err.toString()));
+
+    return(()=>{ 
+      if (con.state === signalR.HubConnectionState.Connected) {
+        con.stop().catch(err => console.error("Errore SignalR stop:", err));
+      }});
+
   }, []);
 
 
@@ -213,27 +211,25 @@ export function Babylon(props: { mac: Array<key> }) {
     }
   }, [M, mac]);
   useEffect(() => {
-    let isactive = true;
-    const fetchData = async () => {
-      let data = await fetch("/api/RelaySwitch/GetProgrammManu", { method: 'GET', headers: { 'Content-type': 'application/json; charl set=UTF-8' } });
-      var res = await data.json() as Tutto[];
-      if (isactive) {
-        {
-          res.map((u, _) => {
-            if (u.macricever === mac) {
-              setM(u.state)
-            }
-          })
+   
+
+  const con = new signalR.HubConnectionBuilder().withUrl("/relaySwitchHub").build();
+                
+    con.on("GetProgmmaManu",(a:Tutto[])=>{
+      a.map((u, _) => {
+        if (u.macricever === mac) {
+            setM(u.state)
         }
-        setTimeout(() => {
-          fetchData();
-        }, 500);
+      });
+    });
+    con.start().catch(err => console.error(err.toString()));
+        
+    return(()=>{
+      if (con.state === signalR.HubConnectionState.Connected) {
+        con.stop().catch(err => console.error("Errore SignalR stop:", err));
       }
-    };
-    fetchData();
-    return () => {
-      isactive = false;
-    };
+    });
+
   }, [mac]);
   //auto
 
@@ -245,27 +241,23 @@ export function Babylon(props: { mac: Array<key> }) {
   }, [Auto, mac]);
 
   useEffect(() => {
-    let isactive = true;
-    const fetchData1 = async () => {
-      let data = await fetch("/api/RelaySwitch/GetProgrammAuto", { method: 'GET' });
-      let res = await data.json() as Tutto[];
-      if (isactive) {
-        {
-          res.map((u, _) => {
-            if (u.macricever === mac) {
-              setAtuo(u.state)
-            }
-          })
-        }
-        setTimeout(() => {
-          fetchData1();
-        }, 500);
+    const con = new signalR.HubConnectionBuilder().withUrl("/relaySwitchHub").build();
+                    
+      con.on("GetProgmmaAuto",(a:Tutto[])=>{
+        a.map((u, _) => {
+          if (u.macricever === mac) {
+             setAtuo(u.state);
+          }
+        });
+      });
+    con.start().catch(err => console.error(err.toString()));
+            
+    return(()=>{
+      if (con.state === signalR.HubConnectionState.Connected) {
+        con.stop().catch(err => console.error("Errore SignalR stop:", err));
       }
-    };
-    fetchData1();
-    return () => {
-      isactive = false;
-    };
+    });
+
   }, [mac]);
 
   return (

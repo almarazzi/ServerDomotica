@@ -12,8 +12,8 @@ namespace provaweb
         public static IServiceCollection AddRelaySwitch(this IServiceCollection services)
         {
             services.AddSingleton<ProgrmmaModificaStatoRelay>();
-           // services.AddSingleton<IRelaySwitchService>(s => s.GetRequiredService<ProgrmmaModificaStatoRelay>());
-            services.AddHostedService(s=>s.GetRequiredService<ProgrmmaModificaStatoRelay>());
+            // services.AddSingleton<IRelaySwitchService>(s => s.GetRequiredService<ProgrmmaModificaStatoRelay>());
+            services.AddHostedService(s => s.GetRequiredService<ProgrmmaModificaStatoRelay>());
             services.AddSingleton<MemoriaStato>();
             services.AddHttpClient("ESPClient");
             services.AddSingleton<ProgrammaSettimanale>();
@@ -23,11 +23,6 @@ namespace provaweb
         }
     }
 
-  /*  public interface IRelaySwitchService
-    {
-        bool StateRelay { get; set; }
-        string mac { get; set; }
-    }*/
     public record ProgrammaGiornaliero(DayOfWeek Day, TimeOnly OraInizio, TimeOnly OraFine)
     {
         public static readonly ProgrammaGiornaliero Empty = new(DayOfWeek.Sunday, TimeOnly.MinValue, TimeOnly.MinValue);
@@ -38,6 +33,12 @@ namespace provaweb
         private readonly static string s_percorso = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.CommonApplicationData), "provaweb/ProgrammaSettimanale.txt");
         private readonly AsyncLock _lock = new();
         private static RegistroEsp? m_programmaDizionarioEsp8266;
+        public event Func<Task>? Evento;
+
+        public void SetNotifice(Notifice notifice)
+        {
+            Evento += notifice.GetWeekProgram;
+        }
 
         public ProgrammaSettimanale(RegistroEsp registroEsp)
         {
@@ -49,9 +50,12 @@ namespace provaweb
 
             if (File.Exists(percorso) && new FileInfo(percorso).Length != 0)
             {
-                var leggi = await File.ReadAllTextAsync(percorso);
-                var programmaModifica = JsonSerializer.Deserialize<ConcurrentDictionary<string, List<ProgrammaGiornaliero>>>(leggi)!;
-                return programmaModifica;
+                using (var fs = new FileStream(s_percorso, FileMode.OpenOrCreate, FileAccess.Read, FileShare.ReadWrite))
+                {
+                    var leggi = await File.ReadAllTextAsync(percorso);
+                    var programmaModifica = JsonSerializer.Deserialize<ConcurrentDictionary<string, List<ProgrammaGiornaliero>>>(leggi)!;
+                    return programmaModifica;
+                }
             }
             else
             {
@@ -79,13 +83,17 @@ namespace provaweb
 
         private async Task Salva()
         {
-            var programma = await m_Programma.WithCancellation(CancellationToken.None);
-            var json = JsonSerializer.Serialize(programma);
-            if (json != null)
+
+            var stati = await m_Programma.WithCancellation(CancellationToken.None);
+            using (var fs = new FileStream(s_percorso, FileMode.Create, FileAccess.Write, FileShare.None))
             {
-                await File.WriteAllTextAsync(s_percorso, json);
+                fs.SetLength(0);
+                await JsonSerializer.SerializeAsync(fs, stati);
             }
+            if (Evento is not null)
+                await Evento.Invoke();
         }
+
 
         public async Task<ConcurrentDictionary<string, List<ProgrammaGiornaliero>>> DammiProgrammaSettimanale()
         {
@@ -107,8 +115,10 @@ namespace provaweb
                     var programma = await m_Programma.WithCancellation(CancellationToken.None);
                     programma[mac][day] = pg;
                     await Salva();
+
                 }
             }
+
         }
 
     }
@@ -124,8 +134,12 @@ namespace provaweb
         private readonly static string s_percorso = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.CommonApplicationData), "provaweb/SetSati.txt");
         private readonly AsyncLock _lock = new();
         private static RegistroEsp? m_dizionarioEsp8266;
-        public event Action Evento;
+        public event Func<Task>? Evento;
 
+        public void SetNotifice(Notifice notifice)
+        {
+            Evento += notifice.GetState;
+        }
         public MemoriaStato(RegistroEsp registroEsp)
         {
             m_Stati = new AsyncLazy<ConcurrentDictionary<string, Stati>>(async (_) => await Create(s_percorso));
@@ -135,9 +149,13 @@ namespace provaweb
         {
             if (File.Exists(percorso) && new FileInfo(percorso).Length != 0)
             {
-                var leggi = await File.ReadAllTextAsync(percorso);
-                var leggiStato = JsonSerializer.Deserialize<ConcurrentDictionary<string, Stati>>(leggi)!;
-                return leggiStato;
+                using (var fs = new FileStream(s_percorso, FileMode.OpenOrCreate, FileAccess.Read, FileShare.ReadWrite))
+                {
+                    var leggi = await File.ReadAllTextAsync(percorso);
+                    var leggiStato = JsonSerializer.Deserialize<ConcurrentDictionary<string, Stati>>(leggi)!;
+                    return leggiStato;
+                }
+
             }
             else
             {
@@ -158,16 +176,24 @@ namespace provaweb
 
         public async Task Salva()
         {
-            var stati = await m_Stati.WithCancellation(CancellationToken.None);
-            var json = JsonSerializer.Serialize(stati);
-            if (json != null)
+
+            using (await _lock.AcquireAsync(CancellationToken.None))
             {
-                await File.WriteAllTextAsync(s_percorso, json);
+                var stati = await m_Stati.WithCancellation(CancellationToken.None);
+                using (var fs = new FileStream(s_percorso, FileMode.OpenOrCreate, FileAccess.Write, FileShare.ReadWrite))
+                {
+                    fs.SetLength(0);
+                    await JsonSerializer.SerializeAsync(fs, stati);
+                  
+                }
             }
+            if (Evento is not null)
+                await Evento.Invoke();
 
         }
         public async Task<ConcurrentDictionary<string, Stati>> DammiStati()
         {
+
             var stati = await m_Stati.WithCancellation(CancellationToken.None);
             return stati;
         }
@@ -188,15 +214,14 @@ namespace provaweb
                     stati[mac] = y;
                     await Salva();
                 }
-                Evento.Invoke();
             }
+
         }
     }
 
     public class ProgrmmaModificaStatoRelay : BackgroundService
     {
         private readonly object _lock = new();
-        private bool m_StateRelay = false;
         private bool M_StateRelay = false;
         private string M_mac = string.Empty;
         public bool StateRelay
@@ -204,10 +229,10 @@ namespace provaweb
             get { lock (_lock) { return M_StateRelay; } }
             set { lock (_lock) { M_StateRelay = value; } }
         }
-        public string mac 
-        { 
-            get { lock (_lock) { return M_mac; } } 
-            set { lock (_lock) { M_mac = value; } } 
+        public string mac
+        {
+            get { lock (_lock) { return M_mac; } }
+            set { lock (_lock) { M_mac = value; } }
         }
         private readonly MemoriaStato m_memoriaStati;
         private readonly ProgrammaSettimanale m_programmaSettimanale;
@@ -216,6 +241,7 @@ namespace provaweb
         private readonly IHttpClientFactory HttpClientFactory;
         private readonly ILogger<ProgrmmaModificaStatoRelay> m_logger;
         private readonly ContorolloEspOnline m_stateRelayGet;
+
         private record State(bool stateRlay);
         public ProgrmmaModificaStatoRelay(TimeProvider t, IHttpClientFactory clientFactory, ILogger<ProgrmmaModificaStatoRelay> logger, RegistroEsp registro, MemoriaStato memoriaStato, ProgrammaSettimanale programmaSettimanale, ContorolloEspOnline stateRelay)
         {
@@ -233,7 +259,7 @@ namespace provaweb
 
             while (!stoppingToken.IsCancellationRequested)
             {
-                if(string.IsNullOrEmpty(M_mac))
+                if (string.IsNullOrEmpty(M_mac))
                 {
                     await m_timeProvider.Delay(TimeSpan.FromMilliseconds(100), stoppingToken);
                     continue;
@@ -256,27 +282,25 @@ namespace provaweb
                 http.BaseAddress = new Uri("http://" + ip[mac].ipEsp);
                 if (ip[mac].abilitazione)
                 {
-   
+
                     if (Ms[mac].StateProgrammAuto == true && Ms[mac].StateProgrammManu == false)
                     {
                         var t = TimeOnly.FromDateTime(m_timeProvider.GetLocalNow().LocalDateTime);
-                        m_StateRelay = t.IsBetween(pg.OraInizio, pg.OraFine);
+                        M_StateRelay = t.IsBetween(pg.OraInizio, pg.OraFine);
 
                     }
                     else if (Ms[mac].StateProgrammAuto == false && Ms[mac].StateProgrammManu == true)
                     {
-                         m_StateRelay = StateRelay;
+
                     }
                     else
                     {
-                        m_StateRelay = false;
-                        StateRelay = m_StateRelay;
+                        M_StateRelay = false;
                     }
                 }
                 else
                 {
-                    m_StateRelay = false;
-                    StateRelay = m_StateRelay;
+                    M_StateRelay = false;
                 }
                 if (m_stateRelayGet.Offline.Contains(mac))
                 {
@@ -284,10 +308,10 @@ namespace provaweb
                     continue;
                 }
 
-                if (m_StateRelay != Ms[mac].StateRelay)
+                if (M_StateRelay != Ms[mac].StateRelay)
                 {
-                    await m_memoriaStati.Modifica(Ms[mac] with { StateRelay = m_StateRelay }, mac);
-                    var jsonContent = new StringContent(JsonSerializer.Serialize(new State(m_StateRelay)));
+                    await m_memoriaStati.Modifica(Ms[mac] with { StateRelay = M_StateRelay }, mac);
+                    var jsonContent = new StringContent(JsonSerializer.Serialize(new State(M_StateRelay)));
                     try
                     {
                         using var invio = await http.PutAsync("/api/RelaySwitch/StateRelay", jsonContent, stoppingToken);
@@ -297,6 +321,7 @@ namespace provaweb
                         m_logger.LogWarning(ex.Message);
                     }
                 }
+                // await m_timeProvider.Delay(TimeSpan.FromSeconds(10), stoppingToken);
             }
         }
     }
@@ -304,11 +329,13 @@ namespace provaweb
     public class ContorolloEspOnline(IHttpClientFactory httpClient, TimeProvider timeProvider, ILogger<ContorolloEspOnline> logger, RegistroEsp registroEsp) : BackgroundService
     {
         private readonly Dictionary<string, long> m_EspOffline = new();
-        //private readonly ImmutableDictionary<string, long>.Builder m_EspOffline = ImmutableDictionary.CreateBuilder<string, long>();
-        //public IReadOnlyDictionary<string, long> Offline = ImmutableDictionary<string, long>.Empty;
-        //public IReadOnlySet<string> Offline = ImmutableHashSet<string>.Empty;
         public IReadOnlyList<string> Offline = Array.Empty<string>();
-       // public event Action Evento;
+        public event Func<Task>? Evento;
+
+        public void SetNotifice(Notifice notifice)
+        {
+            Evento += notifice.StatorelyOff;
+        }
 
 
         private async Task<(string key, bool result)> TestItem(string key, string ipEsp, CancellationToken stoppingToken)
@@ -325,6 +352,7 @@ namespace provaweb
             catch (Exception ex)
             {
                 logger.LogWarning(ex.Message);
+
             }
             return (key, false);
         }
@@ -358,11 +386,12 @@ namespace provaweb
                 }
 
                 Offline = m_EspOffline.Keys.ToImmutableArray();
-
+                if (Evento is not null)
+                    await Evento.Invoke();
                 await timeProvider.Delay(TimeSpan.FromSeconds(1), stoppingToken);
             }
         }
 
     }
-}
 
+}

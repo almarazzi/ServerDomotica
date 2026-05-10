@@ -1,6 +1,7 @@
 ﻿using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.SignalR;
+using static provaweb.RelaySwitch;
 
 
 namespace provaweb
@@ -16,7 +17,6 @@ namespace provaweb
         private readonly ContorolloEspOnline m_stateRelayGet;
         private readonly ProgrmmaModificaStatoRelay m_progrmmaModificaStatoRelay;
 
-        private readonly IHubContext<relaySwitchHub> _hub;
 
         public RelaySwitch(ILogger<RelaySwitch> logger, MemoriaStato memoriaStato, ProgrammaSettimanale programmaSettimanale, ContorolloEspOnline stateRelayGet, ProgrmmaModificaStatoRelay progrmmaModificaStatoRelay, IHubContext<relaySwitchHub> hubContext)
         {
@@ -25,7 +25,6 @@ namespace provaweb
             m_programmaSettimanale = programmaSettimanale;
             m_stateRelayGet = stateRelayGet;
             m_progrmmaModificaStatoRelay = progrmmaModificaStatoRelay;
-            _hub = hubContext;
 
         }
         public record StateProgrammManu(bool stateProgrammManu, string macricever);
@@ -50,17 +49,6 @@ namespace provaweb
             }
             return Ok();
         }
-        [HttpGet("GetState")]
-        [Authorize]
-
-        public async Task<IActionResult> GetState()
-        {
-            var y = await m_memoriaStati.DammiStati();
-            var s = y.Select(x => new Oggreturn(x.Value.StateRelay, x.Key));
-            return Ok(s);
-
-        }
-
         [HttpPut("stateProgrammManu")]
         [Authorize]
 
@@ -70,15 +58,6 @@ namespace provaweb
             await m_memoriaStati.Modifica(y[StateProgrammManu.macricever] with { StateProgrammManu = StateProgrammManu.stateProgrammManu }, StateProgrammManu.macricever);
             return Ok();
         }
-        [HttpGet("GetProgrammManu")]
-        [Authorize]
-
-        public async Task<IActionResult> GetProgrammManu()
-        {
-            var y = await m_memoriaStati.DammiStati();
-            return Ok(y.Select(x => new Oggreturn(x.Value.StateProgrammManu, x.Key)));
-        }
-
         [HttpPut("stateProgrammAuto")]
         [Authorize]
 
@@ -87,14 +66,6 @@ namespace provaweb
             var y = await m_memoriaStati.DammiStati();
             await m_memoriaStati.Modifica(y[StateProgrammAuto.macricever] with { StateProgrammAuto = StateProgrammAuto.stateProgrammAuto }, StateProgrammAuto.macricever);
             return Ok();
-        }
-        [HttpGet("GetProgrammAuto")]
-        [Authorize]
-
-        public async Task<IActionResult> GetProgrammAuto()
-        {
-            var y = await m_memoriaStati.DammiStati();
-            return Ok(y.Select(x => new Oggreturn(x.Value.StateProgrammAuto, x.Key)));
         }
 
         [HttpPut("SetData")]
@@ -117,17 +88,6 @@ namespace provaweb
             await m_programmaSettimanale.SetProgrammaGiornaliero(ProgrammaGiornaliero.Empty with { Day = day, OraInizio = inizio, OraFine = fine }, setData.mac);
             return Ok(await m_programmaSettimanale.DammiProgrammaSettimanale());
         }
-
-
-        [HttpGet("GetWeekProgram")]
-        [Authorize]
-
-        public async Task<IActionResult> GetWeekProgram()
-        {
-            var y = await m_programmaSettimanale.DammiProgrammaSettimanale();
-            return Ok(y.ToList());
-        }
     }
-
 }
 

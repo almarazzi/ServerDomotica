@@ -11,9 +11,9 @@ builder.Services.AddSingleton(TimeProvider.System);
 builder.Services.AddSingleton<ActiveUsersService>();
 builder.Services.AddHostedService(sp => sp.GetRequiredService<ActiveUsersService>());
 builder.Services.AddSingleton(new DriveInfo("C:"));
-builder.Services.AddRelaySwitch();
+builder.Services.AddSingleton<Notifice>();
 builder.Services.AddSignalR();
-builder.Services.AddSingleton<relaySwitchHub>();
+builder.Services.AddRelaySwitch();
 builder.Services.Addreceiver_esp8266Service();
 builder.Services.addServiceDatabase();
 builder.Services.AddControllers();
@@ -66,7 +66,21 @@ builder.Services.AddAuthentication(CookieAuthenticationDefaults.AuthenticationSc
 
 
 
+
+
 var app = builder.Build();
+
+var notifice = app.Services.GetRequiredService<Notifice>();
+var controllo = app.Services.GetRequiredService<ContorolloEspOnline>();
+var RegistoEsp = app.Services.GetRequiredService<RegistroEsp>();
+var StatoMem = app.Services.GetRequiredService<MemoriaStato>();
+var ActiveUser = app.Services.GetRequiredService<ActiveUsersService>();
+var ProgrammAuto = app.Services.GetRequiredService<ProgrammaSettimanale>();
+controllo.SetNotifice(notifice);
+RegistoEsp.SetNotifice(notifice);
+StatoMem.SetNotifice(notifice);
+ActiveUser.SetNotifice(notifice);
+ProgrammAuto.SetNotifice(notifice);
 
 app.MapHub<relaySwitchHub>("relaySwitchHub");
 
@@ -85,7 +99,7 @@ app.UseFileServer(new FileServerOptions()
     FileProvider = new PhysicalFileProvider(
            Path.Combine(asmDir!, "dist")),
     RequestPath = "",
- 
+
 });
 
 

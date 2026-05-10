@@ -7,6 +7,12 @@ namespace provaweb
         private readonly ConcurrentDictionary<string, long> m_lastUserVisit = new();
         private readonly TimeProvider m_timeProvider;
         private readonly ILogger m_logger;
+        public event Func<Task>? Evento;
+
+        public void SetNotifice(Notifice notifice)
+        {
+            Evento += notifice.Getlistuser;
+        }
         public ActiveUsersService(ILogger<ActiveUsersService> logger, TimeProvider timeProvider)
         {
             m_logger = logger;
@@ -20,7 +26,7 @@ namespace provaweb
         {
             if (m_lastUserVisit.TryGetValue(userName, out long dt))
             {
-                return m_timeProvider.GetElapsedTime(dt).TotalSeconds < 5;
+                return m_timeProvider.GetElapsedTime(dt).TotalSeconds < 10;
             }
             return false;
         }
@@ -39,7 +45,8 @@ namespace provaweb
                     m_lastUserVisit.Remove(item, out long _);
                     m_logger.LogInformation("Removed user {UserName}", item);
                 }
-
+                if (Evento is not null)
+                    await Evento.Invoke();
                 await m_timeProvider.Delay(TimeSpan.FromSeconds(5), stoppingToken);
             }
         }

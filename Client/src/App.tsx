@@ -11,6 +11,7 @@ import  ControlloUtenti  from './componenti/ControlloUtenti';
 import  Esp  from './componenti/Esp';
 import  Babylon  from './componenti/Babylon';
 import DiagnosticaServer from './componenti/DiagnosticaServer'
+import * as signalR from "@microsoft/signalr"
 
 
 interface Lista {
@@ -50,25 +51,24 @@ function App() {
     setGrado(Getgrado.ruolo);
   },[Getgrado]);
 
-  useEffect(() => {
-    let isActive = true;
-    const fetchData = async () => {
-      let data = await fetch("/apiEsp/ListaEsp", { method: 'GET' });
-      if (!isActive) return;
-      var res = await data.json() as key[];
-      if (!isActive) return;
-      Setlista(res);
+ 
+   useEffect(() => {
 
-      if (isActive === true) {
-        setTimeout(() => {
-          fetchData();
-        }, 500);
-      }
-    };
-    fetchData();
-    return () => { isActive = false; }
-  }, [token]);
+const con = new signalR.HubConnectionBuilder().withUrl("/relaySwitchHub").build();
 
+    con.on("ListaEsp",(a:key[])=>{
+      Setlista(a)
+    });
+    
+    con.start().catch(err => console.error(err.toString()));
+
+    return(()=>{  
+      if (con.state === signalR.HubConnectionState.Connected) {
+         con.stop().catch(err => console.error("Errore SignalR stop:", err));
+        }});
+
+
+   },[token]);
 
   useEffect(() => {
     const Autenticazione = async () => {
@@ -80,7 +80,7 @@ function App() {
       }
       setTimeout(() => {
         Autenticazione();
-      }, 1000)
+      }, 5000)
     };
     Autenticazione();
   }, []);
@@ -126,3 +126,22 @@ function App() {
   );
 }
 export default App;
+
+ /*useEffect(() => {
+    let isActive = true;
+    const fetchData = async () => {
+      let data = await fetch("/apiEsp/ListaEsp", { method: 'GET' });
+      if (!isActive) return;
+      var res = await data.json() as key[];
+      if (!isActive) return;
+      Setlista(res);
+
+      if (isActive === true) {
+        setTimeout(() => {
+          fetchData();
+        }, 500);
+      }
+    };
+    fetchData();
+    return () => { isActive = false; }
+  }, [token]);*/

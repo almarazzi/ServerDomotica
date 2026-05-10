@@ -71,7 +71,12 @@ namespace provaweb
         private readonly AsyncLazy<ConcurrentDictionary<string, Value_Esp8266>> m_ProgrammaEsp8266;
         private readonly static string s_percorso = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.CommonApplicationData), "provaweb/ProgrammaDizionarioEsp8266.txt");
         private readonly AsyncLock _lock = new();
+        public event Func<Task>? Evento;
 
+        public void SetNotifice(Notifice notifice)
+        {
+            Evento += notifice.ListaEsp;
+        }
         public RegistroEsp()
         {
             m_ProgrammaEsp8266 = new AsyncLazy<ConcurrentDictionary<string, Value_Esp8266>>(async (_) => await LeggereProgrammaEsp8266(s_percorso));
@@ -82,10 +87,12 @@ namespace provaweb
 
             if (File.Exists(percorso) && new FileInfo(percorso).Length != 0)
             {
-
-                var leggi = await File.ReadAllTextAsync(percorso);
-                var ProgrammaDizionarioEsp8266Deserializato = JsonSerializer.Deserialize<ConcurrentDictionary<string, Value_Esp8266>>(leggi)!;
-                return ProgrammaDizionarioEsp8266Deserializato;
+                using (var fs = new FileStream(s_percorso, FileMode.OpenOrCreate, FileAccess.Read, FileShare.ReadWrite))
+                {
+                    var leggi = await File.ReadAllTextAsync(percorso);
+                    var ProgrammaDizionarioEsp8266Deserializato = JsonSerializer.Deserialize<ConcurrentDictionary<string, Value_Esp8266>>(leggi)!;
+                    return ProgrammaDizionarioEsp8266Deserializato;
+                }
 
             }
             return new ConcurrentDictionary<string, Value_Esp8266>();
@@ -94,19 +101,23 @@ namespace provaweb
         {
 
             var f = await m_ProgrammaEsp8266.WithCancellation(CancellationToken.None);
+
             return f;
 
         }
 
         private async Task SalvareProgrammaEsp8266()
         {
-            var registro = await m_ProgrammaEsp8266.WithCancellation(CancellationToken.None);
-            var ProgrammaDizionarioEsp8266Serializato = JsonSerializer.Serialize(registro);
-            if (ProgrammaDizionarioEsp8266Serializato != null)
+
+            var stati = await m_ProgrammaEsp8266.WithCancellation(CancellationToken.None);
+            using (var fs = new FileStream(s_percorso, FileMode.Create, FileAccess.Write, FileShare.None))
             {
-                await File.WriteAllTextAsync(s_percorso, ProgrammaDizionarioEsp8266Serializato);
+                fs.SetLength(0);
+                await JsonSerializer.SerializeAsync(fs, stati);
             }
+
         }
+
         public async Task ModificareProgrammaEsp8266(Value_Esp8266 re, string MAC)
         {
             using (await _lock.AcquireAsync(CancellationToken.None))
@@ -120,6 +131,8 @@ namespace provaweb
                     var f = await m_ProgrammaEsp8266.WithCancellation(CancellationToken.None);
                     f[MAC] = new Value_Esp8266(NomeEspClient: re.NomeEspClient, ipEsp: re.ipEsp, abilitazione: re.abilitazione);
                     await SalvareProgrammaEsp8266();
+                    if (Evento != null)
+                        await Evento.Invoke();
 
                 }
             }

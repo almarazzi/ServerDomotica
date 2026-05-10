@@ -10,15 +10,7 @@ export function Manuale(props: { mac: string }) {
 
 
   useEffect(()=>{
-     const fetchData = async () => {
 
-      let data = await fetch("/api/RelaySwitch/GetState", { method: 'GET' }); //prima Volta
-      var res = await data.json() as Tutto[];
-      res.map((u, _) => {
-        if (u.macricever === props.mac)
-          stateOn(u.state);
-      });
-    };
 
     const con = new signalR.HubConnectionBuilder().withUrl("/relaySwitchHub").build();
 
@@ -28,34 +20,21 @@ export function Manuale(props: { mac: string }) {
             stateOn(element.state)
       });
     });
-    fetchData(); //prima Volta
+      con.on("StatoRelayOff",(a:String[])=>{
+       if(a.includes(props.mac)) {
+          window.location.href = "/";
+        }
+    });
     con.start().catch(err => console.error(err.toString()));
 
-    return(()=>{con.stop()})
+    return(()=>{ 
+      if (con.state === signalR.HubConnectionState.Connected) {
+        con.stop().catch(err => console.error("Errore SignalR stop:", err));
+      }});
 
   },[props.mac,stateOn])
   
-useEffect(()=>{
-    let isactive = true;
 
-    const api = async () => {
-      let data = await fetch("/apiEsp/StatoRelay", { method: 'GET' });
-      var res = await data.json() as string[];
-      if (isactive) 
-      {
-        if(res.includes(props.mac)) {
-          window.location.href = "/";
-        }
-      }
-      setTimeout(()=>{
-        api();
-      },500);
-    };
-    api();
-    return ()=>{
-      isactive = false;
-    }
-  },[props.mac]);
   return (
     <Fragment>
       <div className="Manuale1">
@@ -97,4 +76,27 @@ useEffect(()=>{
       isactive = false;
     };
   }, []);*/
+
+
+  /*useEffect(()=>{
+    let isactive = true;
+
+    const api = async () => {
+      let data = await fetch("/apiEsp/StatoRelay", { method: 'GET' });
+      var res = await data.json() as string[];
+      if (isactive) 
+      {
+        if(res.includes(props.mac)) {
+          window.location.href = "/";
+        }
+      }
+      setTimeout(()=>{
+        api();
+      },500);
+    };
+    api();
+    return ()=>{
+      isactive = false;
+    }
+  },[props.mac]);*/
 export default Manuale;
