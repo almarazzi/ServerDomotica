@@ -52,7 +52,7 @@ export function Layout(props: { setToken: (t: boolean) => void; p: boolean; Grad
                                     Menu
                                 </a>
                                 <ul className="dropdown-menu dropdown-menu-dark" aria-labelledby="navbarDarkDropdownMenuLink">
-                                    {(grado === "Admin" || grado === "Basic") &&(
+                                    {(grado === "Admin" || grado === "Basic") && (
                                         <>
                                             <li>
                                                 <Link to={"/ESP"} className={"dropdown-item"}>ESP</Link>
@@ -70,19 +70,21 @@ export function Layout(props: { setToken: (t: boolean) => void; p: boolean; Grad
                                             )}
                                         </>
                                     )}
-                                      {(grado === "Admin" || grado === "root") &&(
+                                      {(grado === "Admin" || grado === "root") && (
                                         <>
                                             <li>
                                                 <Link to={"/NuovoAccount"} className={"dropdown-item"}> NuovoAccount</Link>
                                             </li>
                                         </>
                                     )}
-                                    {(grado === "Admin") &&(
+                                    {(grado === "Admin") && (
                                     <>
-                                        <li>
-                                            <Link to={"/ControlloUtenti"} className={"dropdown-item"}>ControlloUtenti</Link>
-                                            <Link to={"/DiagnosticaServer"} className={"dropdown-item"}>DiagnosticaServer</Link>
-                                        </li>
+                                        {props.p === false &&(
+                                            <li>
+                                                <Link to={"/ControlloUtenti"} className={"dropdown-item"}>ControlloUtenti</Link>
+                                                <Link to={"/DiagnosticaServer"} className={"dropdown-item"}>DiagnosticaServer</Link>
+                                            </li>
+                                        )}
                                     </>
                                     )}
                                 </ul>

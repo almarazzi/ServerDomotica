@@ -40,32 +40,38 @@ export function ControlloUtenti() {
 
     useEffect(() => {
         users.map((u, _) => {
-            setAbilitazione(StatoAttuale => ({
-                ...StatoAttuale,
-                [u.userName]: u.statoAccount
-            }));
+           
+            setAbilitazione(StatoAttuale => {
+                 const Stato = {...StatoAttuale}
+                Stato[u.userName]= u.statoAccount
+                return Stato
+            });
+
         });
     }, [users]);
 
     useEffect(() => {
         users.map((u, _) => {
             if (u.isOnline === true && u.statoAccount === true) {
-                setImmagine(StatoAttuale => ({
-                    ...StatoAttuale,
-                    [u.userName]: OnlineAblitato
-                }));
+                setImmagine(StatoAttuale => {
+                   const Stato = {...StatoAttuale}
+                    Stato[u.userName]= OnlineAblitato
+                    return Stato
+                });
             }
             if (u.isOnline === false && u.statoAccount === true) {
-                setImmagine(StatoAttuale => ({
-                    ...StatoAttuale,
-                    [u.userName]: OfflineAblitato
-                }));
+                setImmagine(StatoAttuale => {
+                   const Stato = {...StatoAttuale}
+                    Stato[u.userName]= OfflineAblitato
+                    return Stato
+                });
             }
             if (u.isOnline === false && u.statoAccount === false) {
-                setImmagine(StatoAttuale => ({
-                    ...StatoAttuale,
-                    [u.userName]: OfflineNonAbilitato
-                }));
+                setImmagine(StatoAttuale => {
+                    const Stato = {...StatoAttuale}
+                    Stato[u.userName]= OfflineNonAbilitato
+                    return Stato
+                });
             }
         });
     }, [users]);

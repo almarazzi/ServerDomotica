@@ -86,6 +86,7 @@ namespace provaweb
                 fine = TimeOnly.Parse(setData.fine);
             }
             await m_programmaSettimanale.SetProgrammaGiornaliero(ProgrammaGiornaliero.Empty with { Day = day, OraInizio = inizio, OraFine = fine }, setData.mac);
+            m_progrmmaModificaStatoRelay.mac = setData.mac;
             return Ok(await m_programmaSettimanale.DammiProgrammaSettimanale());
         }
     }

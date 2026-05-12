@@ -50,7 +50,7 @@ namespace provaweb
 
             if (File.Exists(percorso) && new FileInfo(percorso).Length != 0)
             {
-                using (var fs = new FileStream(s_percorso, FileMode.OpenOrCreate, FileAccess.Read, FileShare.ReadWrite))
+                using (new FileStream(percorso, FileMode.OpenOrCreate, FileAccess.Read, FileShare.ReadWrite))
                 {
                     var leggi = await File.ReadAllTextAsync(percorso);
                     var programmaModifica = JsonSerializer.Deserialize<ConcurrentDictionary<string, List<ProgrammaGiornaliero>>>(leggi)!;
@@ -85,7 +85,7 @@ namespace provaweb
         {
 
             var stati = await m_Programma.WithCancellation(CancellationToken.None);
-            using (var fs = new FileStream(s_percorso, FileMode.Create, FileAccess.Write, FileShare.None))
+            using (var fs = new FileStream(s_percorso, FileMode.Create, FileAccess.Write, FileShare.ReadWrite))
             {
                 fs.SetLength(0);
                 await JsonSerializer.SerializeAsync(fs, stati);
@@ -149,7 +149,7 @@ namespace provaweb
         {
             if (File.Exists(percorso) && new FileInfo(percorso).Length != 0)
             {
-                using (var fs = new FileStream(s_percorso, FileMode.OpenOrCreate, FileAccess.Read, FileShare.ReadWrite))
+                using (new FileStream(percorso, FileMode.OpenOrCreate, FileAccess.Read, FileShare.ReadWrite))
                 {
                     var leggi = await File.ReadAllTextAsync(percorso);
                     var leggiStato = JsonSerializer.Deserialize<ConcurrentDictionary<string, Stati>>(leggi)!;
@@ -277,19 +277,19 @@ namespace provaweb
 
                 var ip = await m_programmaDizionarioEsp8266.dammiListaEsp();
 
-                pg = Re[mac][(int)d];
+                pg = Re[M_mac][(int)d];
                 using var http = HttpClientFactory.CreateClient("ESPClient");
-                http.BaseAddress = new Uri("http://" + ip[mac].ipEsp);
-                if (ip[mac].abilitazione)
+                http.BaseAddress = new Uri("http://" + ip[M_mac].ipEsp);
+                if (ip[M_mac].abilitazione)
                 {
 
-                    if (Ms[mac].StateProgrammAuto == true && Ms[mac].StateProgrammManu == false)
+                    if (Ms[M_mac].StateProgrammAuto == true && Ms[M_mac].StateProgrammManu == false)
                     {
                         var t = TimeOnly.FromDateTime(m_timeProvider.GetLocalNow().LocalDateTime);
                         M_StateRelay = t.IsBetween(pg.OraInizio, pg.OraFine);
 
                     }
-                    else if (Ms[mac].StateProgrammAuto == false && Ms[mac].StateProgrammManu == true)
+                    else if (Ms[M_mac].StateProgrammAuto == false && Ms[M_mac].StateProgrammManu == true)
                     {
 
                     }
@@ -302,15 +302,15 @@ namespace provaweb
                 {
                     M_StateRelay = false;
                 }
-                if (m_stateRelayGet.Offline.Contains(mac))
+                if (m_stateRelayGet.Offline.Contains(M_mac))
                 {
-                    await m_memoriaStati.Modifica(Ms[mac] with { StateRelay = false }, mac);
+                    await m_memoriaStati.Modifica(Ms[M_mac] with { StateRelay = false }, M_mac);
                     continue;
                 }
 
-                if (M_StateRelay != Ms[mac].StateRelay)
+                if (M_StateRelay != Ms[M_mac].StateRelay)
                 {
-                    await m_memoriaStati.Modifica(Ms[mac] with { StateRelay = M_StateRelay }, mac);
+                    await m_memoriaStati.Modifica(Ms[M_mac] with { StateRelay = M_StateRelay }, M_mac);
                     var jsonContent = new StringContent(JsonSerializer.Serialize(new State(M_StateRelay)));
                     try
                     {
