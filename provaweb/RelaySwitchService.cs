@@ -85,7 +85,7 @@ namespace provaweb
         {
 
             var stati = await m_Programma.WithCancellation(CancellationToken.None);
-            using (var fs = new FileStream(s_percorso, FileMode.Create, FileAccess.Write, FileShare.ReadWrite))
+            using (var fs = new FileStream(s_percorso, FileMode.OpenOrCreate, FileAccess.Write, FileShare.ReadWrite))
             {
                 fs.SetLength(0);
                 await JsonSerializer.SerializeAsync(fs, stati);

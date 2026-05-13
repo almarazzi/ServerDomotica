@@ -12,7 +12,7 @@ namespace provaweb
         private readonly DriveInfo m_driveInfo;
         public record Spazio(string Nome, double SpazioLibero, double SpazioTotale)
         {
-            public static readonly Spazio Empty = new("",0.0,0.0);
+            public static readonly Spazio Empty = new("", 0.0, 0.0);
         };
 
         public apiPC(ILogger<Login> logger,DriveInfo driveInfo)

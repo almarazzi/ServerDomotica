@@ -13,7 +13,9 @@ namespace provaweb
     {
         public static IServiceCollection Addreceiver_esp8266Service(this IServiceCollection services)
         {
-            services.AddHostedService<receiver_espService_Brocast>();
+            // services.AddSingleton<receiver_espService_Brocast>();
+            // services.AddHostedService(s => s.GetRequiredService<receiver_espService_Brocast>());
+            services.AddHostedService<receiver_espService_Brocast>(); // Perche non la riturizzo da nessuna parte
             services.AddSingleton<RegistroEsp>();
             return services;
         }
@@ -45,18 +47,15 @@ namespace provaweb
                 await m_UDPClient.SendAsync(Encoding.ASCII.GetBytes(s), s.Length, receive.RemoteEndPoint.Address.ToString(), 8888);
                 var f = await m_registroEsp.dammiListaEsp();
                 var attuale = f.FirstOrDefault(x => x.Key == Mac);
-                var nome = "";
-                var abi = false;
-                if (attuale.Value != null)
+                if (attuale.Value is null)
                 {
-                    nome = attuale.Value.NomeEspClient;
-                    abi = attuale.Value.abilitazione;
+                    await m_registroEsp.ModificareProgrammaEsp8266(Value_Esp8266.Empty with { ipEsp = receive.RemoteEndPoint.Address.ToString(), NomeEspClient = "esp", abilitazione = false }, Mac);
                 }
-                await m_registroEsp.ModificareProgrammaEsp8266(Value_Esp8266.Empty with { ipEsp = receive.RemoteEndPoint.Address.ToString(), NomeEspClient = (nome != null ? nome : "esp"), abilitazione = abi }, Mac);
-
+                else if (attuale.Value.ipEsp != receive.RemoteEndPoint.Address.ToString())
+                {
+                    await m_registroEsp.ModificareProgrammaEsp8266(attuale.Value with { ipEsp = receive.RemoteEndPoint.Address.ToString() }, Mac);
+                }
             }
-
-
         }
     }
 
@@ -110,10 +109,12 @@ namespace provaweb
         {
 
             var stati = await m_ProgrammaEsp8266.WithCancellation(CancellationToken.None);
-            using (var fs = new FileStream(s_percorso, FileMode.Create, FileAccess.Write, FileShare.None))
+            using (var fs = new FileStream(s_percorso, FileMode.OpenOrCreate, FileAccess.Write, FileShare.ReadWrite))
             {
                 fs.SetLength(0);
                 await JsonSerializer.SerializeAsync(fs, stati);
+                if (Evento != null)
+                    await Evento.Invoke();
             }
 
         }
@@ -131,8 +132,7 @@ namespace provaweb
                     var f = await m_ProgrammaEsp8266.WithCancellation(CancellationToken.None);
                     f[MAC] = new Value_Esp8266(NomeEspClient: re.NomeEspClient, ipEsp: re.ipEsp, abilitazione: re.abilitazione);
                     await SalvareProgrammaEsp8266();
-                    if (Evento != null)
-                        await Evento.Invoke();
+
 
                 }
             }

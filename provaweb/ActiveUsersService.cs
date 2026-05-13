@@ -38,12 +38,12 @@ namespace provaweb
         {
             while (!stoppingToken.IsCancellationRequested)
             {
-                m_logger.LogInformation("Eviction cycle...");
+               // m_logger.LogInformation("Eviction cycle...");
                 var itemsToRemove = m_lastUserVisit.Where(x => !IsActive(x.Key)).Select(x => x.Key).ToList();
                 foreach (var item in itemsToRemove)
                 {
                     m_lastUserVisit.Remove(item, out long _);
-                    m_logger.LogInformation("Removed user {UserName}", item);
+                   // m_logger.LogInformation("Removed user {UserName}", item);
                 }
                 if (Evento is not null)
                     await Evento.Invoke();
