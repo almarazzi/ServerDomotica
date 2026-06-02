@@ -340,6 +340,7 @@ namespace provaweb
 
         private async Task<(string key, bool result)> TestItem(string key, string ipEsp, CancellationToken stoppingToken)
         {
+            
             using var http = httpClient.CreateClient("ESPClient");
             http.BaseAddress = new Uri("http://" + ipEsp);
             http.Timeout = TimeSpan.FromSeconds(2);

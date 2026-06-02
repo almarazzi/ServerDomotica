@@ -127,21 +127,3 @@ const con = new signalR.HubConnectionBuilder().withUrl("/relaySwitchHub").build(
 }
 export default App;
 
- /*useEffect(() => {
-    let isActive = true;
-    const fetchData = async () => {
-      let data = await fetch("/apiEsp/ListaEsp", { method: 'GET' });
-      if (!isActive) return;
-      var res = await data.json() as key[];
-      if (!isActive) return;
-      Setlista(res);
-
-      if (isActive === true) {
-        setTimeout(() => {
-          fetchData();
-        }, 500);
-      }
-    };
-    fetchData();
-    return () => { isActive = false; }
-  }, [token]);*/

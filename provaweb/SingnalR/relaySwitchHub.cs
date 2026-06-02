@@ -39,6 +39,8 @@ namespace provaweb
             var l = f.OrderBy(x => g.Contains(x.Key)).ToList();
             await Clients.Caller.SendAsync("ListaEsp", l);
 
+            await Clients.Caller.SendAsync("StatoRelayOff", g);
+
             await Clients.Caller.SendAsync("GetProgmmaManu", y.Select(x => new Oggreturn(x.Value.StateProgrammManu, x.Key)));
 
             await Clients.Caller.SendAsync("GetProgmmaAuto", y.Select(x => new Oggreturn(x.Value.StateProgrammAuto, x.Key)));

@@ -125,28 +125,3 @@ export function ComponenteEsp(props: { mac: string, ip: string, Ablitazione: boo
     );
 }
 export default ComponenteEsp;
-
-
-/* useEffect(() => {
-        let isactive = true;
-        const fetchData = async () => {
-            let data = await fetch("/api/RelaySwitch/GetProgrammManu", { method: 'GET' });
-            var res = await data.json() as Tutto[];
-            if (isactive) {
-                {
-                    res.map((u, _) => {
-                        if (u.macricever === props.mac) {
-                            setM(u.state)
-                        }
-                    })
-                }
-                setTimeout(() => {
-                    fetchData();
-                }, 500);
-            }
-        };
-        fetchData();
-        return () => {
-            isactive = false;
-        };
-    }, []);*/

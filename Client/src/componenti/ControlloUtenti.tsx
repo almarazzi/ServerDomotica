@@ -106,21 +106,3 @@ export function ControlloUtenti() {
     );
 }
 export default ControlloUtenti;
-
-
-/* let isActive = true;
-        const fetchData = async () => {
-            let data = await fetch("/Login/Getlistuser", { method: 'GET' });
-            if (!isActive) return;
-            var res = await data.json() as User[];
-            if (!isActive) return;
-            setUsers(res);
-            if (isActive === true) {
-                setTimeout(() => {
-                    fetchData();
-                }, 500);
-            }
-        };
-        fetchData();
-        return () => { isActive = false; }  //cleanup when component unmounts
-*/

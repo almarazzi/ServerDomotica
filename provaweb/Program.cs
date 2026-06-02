@@ -7,6 +7,7 @@ using System.Reflection;
 
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
 var builder = WebApplication.CreateBuilder(args);
+builder.Logging.AddFilter("System.Net.Http.HttpClient", LogLevel.Warning);
 builder.Services.AddSingleton(TimeProvider.System);
 builder.Services.AddSingleton<ActiveUsersService>();
 builder.Services.AddHostedService(sp => sp.GetRequiredService<ActiveUsersService>());
