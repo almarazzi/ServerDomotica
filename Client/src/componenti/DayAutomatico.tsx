@@ -48,13 +48,11 @@ export function DayAutomatico(props: { dayOfWeek: number, array: Array<Oragiorno
     props.array.forEach((u, _) => {
       if (u.day === props.dayOfWeek) {
         if (u.oraInizio != "00:00:00") {
-          //inizio= u.oraInizio;
           SetoraInz(u.oraInizio);
           SetdataInz(u.oraInizio);
         }
 
         if (u.oraFine != "00:00:00") {
-          // fine= u.oraFine;
           SetoraFin(u.oraFine);
           SetdataFin(u.oraFine)
         }
@@ -66,9 +64,6 @@ export function DayAutomatico(props: { dayOfWeek: number, array: Array<Oragiorno
   let totIn = 0;
   let totFi = 0;
   let tot = 0;
-  let ttt = 0;
-
-
 
   useEffect(() => {
     setTimeout(() => {
@@ -98,7 +93,6 @@ export function DayAutomatico(props: { dayOfWeek: number, array: Array<Oragiorno
       let minutis = d.getMinutes();
       let tot = hours + minutis;
       totFi = (tot / 1440) * 100;
-      // oraTF(totFi); 
 
     }, 100);
     setTimeout(() => {
@@ -125,8 +119,7 @@ export function DayAutomatico(props: { dayOfWeek: number, array: Array<Oragiorno
     setTimeout(() => {
       tot = totFi - totIn;
       SetoraCors(tot);
-      ttt = 100 - (tot + totFi + totIn);
-      SetoraTotFin(totFi + ttt);
+      SetoraTotFin(100-(totIn + tot));
     }, 100);
   }, [oraFin, oraInz]);
 
