@@ -367,7 +367,7 @@ namespace provaweb
                 {
                     if (m_EspOffline.TryGetValue(item.Key, out long value))
                     {
-                        if (timeProvider.GetElapsedTime(value).TotalSeconds < 5)
+                        if (timeProvider.GetElapsedTime(value).TotalSeconds < 3)
                         {
                             continue;
                         }
